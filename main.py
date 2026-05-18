@@ -1,4 +1,5 @@
 import tkinter as tk
+from backend import *
 
 # ------------------------------------- Create Root ------------------------------------
 root = tk.Tk()
@@ -161,7 +162,21 @@ def create_card(parent, card_id, row):
         fg="black"
     )
 
+    # Places button inside card grid area
     card_button.grid(row=0, column=2, sticky="ns")
+
+    # Creating the numbers 1, 2, 3 ... at the left end of each card
+
+    card_label = tk.Label(
+        card,
+        text=card_id+1,
+        padx=0,
+        pady=5,
+        font=("Times New Roman", 20),
+        fg="black",
+    )
+
+    card_label.grid(row=0, column=0, sticky="nsew")
 
     # Place the card inside the scrolling frame
     card.grid(
@@ -172,10 +187,7 @@ def create_card(parent, card_id, row):
         pady=5
     )
 
-    card_label = tk.Label(card)
-
-    card_label.grid(row=0, column=0)
-
+    #
     parent.grid_columnconfigure(0, weight=1)
 
 # Creates a card for every to do list item, and also updates it when any changes are made to the list of tasks
