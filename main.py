@@ -3,6 +3,7 @@ from backend import *
 
 # ------------------------------------- Create Root ------------------------------------
 root = tk.Tk()
+root.title("To do list :]")
 
 # Make root expandable
 root.rowconfigure(0, weight=1)
@@ -40,7 +41,7 @@ home_page.columnconfigure(1, minsize = 500, weight=5)
 
 title_label = tk.Label(
     home_page,
-    text="Title",
+    text="To do list :)",
     padx=10,
     pady=10,
     font=("Times New Roman", 50),
@@ -118,17 +119,19 @@ canvas.bind("<Configure>", resize_frame)
 # the correct information that corresponds to the card.
 
 def open_view_task_page(card_id):
-    task = task_list[card_id]
+    # Get the title and description info from the task
+    title, description = get_task_info(card_id)
 
     # Clears the title and description entry boxes on the view task page
     title_edit_entry.delete("1.0", tk.END)
     description_edit_entry.delete("1.0", tk.END)
 
     # Writes new title and description into those 2 entry boxes on the view task page
-    title_edit_entry.insert("1.0", task["title"])
-    description_edit_entry.insert("1.0", task["description"])
+    title_edit_entry.insert("1.0", task_list[card_id]["title"])
+    description_edit_entry.insert("1.0", task_list[card_id]["description"])
 
-    # store selected task id on the view task page
+    # store selected task id on the view task page so the information of the current task is accessible
+    # from the view task page
     view_task_page.current_task_id = card_id
 
     # Switches to the view task page
@@ -144,6 +147,8 @@ def create_card(parent, card_id, row):
         relief="ridge",
         bd = 2
     )
+    # -------------------------------- Card Layout -------------------------------
+
     # Nested grid inside each card
     card.grid_columnconfigure(0, weight=1)
     card.grid_columnconfigure(1, weight=10)
@@ -178,6 +183,23 @@ def create_card(parent, card_id, row):
 
     card_label.grid(row=0, column=0, sticky="nsew")
 
+    # Display the title of the task on each card
+
+    # title is shortened to fit the frame, there is a max number of characters
+    shortened_title = get_shortened_title(card_id)
+
+    card_title = tk.Label(
+        card,
+        text=shortened_title,
+        padx=0,
+        pady=5,
+        font=TEXT_FONT,
+        fg="black",
+        anchor="w" # Aligns text to the left
+    )
+
+    card_title.grid(row=0, column=1, sticky="nsew")
+
     # Place the card inside the scrolling frame
     card.grid(
         row=row,
@@ -187,7 +209,6 @@ def create_card(parent, card_id, row):
         pady=5
     )
 
-    #
     parent.grid_columnconfigure(0, weight=1)
 
 # Creates a card for every to do list item, and also updates it when any changes are made to the list of tasks
@@ -229,7 +250,7 @@ add_task_page.columnconfigure(1, minsize = 600, weight=5)
 
 title_label = tk.Label(
     add_task_page,
-    text="Title",
+    text="Add new task",
     padx=10,
     pady=10,
     font=("Times New Roman", 50),
@@ -243,8 +264,13 @@ title_label.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
 # Submit the info the user has entered in the 2 fields
 def submit_new_task():
-    title = title_entry.get()
-    description = description_entry.get()
+    # Gets the info from the title entry and description entry
+    title = title_entry.get("1.0", "end-1c")
+    description = description_entry.get("1.0", "end-1c")
+
+    # Clears the text boxes
+    title_entry.delete("1.0", tk.END)
+    description_entry.delete("1.0", tk.END)
 
     # Adds the new task to the list of tasks and also saves it to the json file
     add_new_task(title, description)
@@ -252,9 +278,8 @@ def submit_new_task():
     # Refreshes the home page so that the new cards show up on the home page
     refresh_home_page_cards()
 
-    # Clear everything entered in those 2 fields
-    title_entry.delete(0, tk.END)
-    description_entry.delete(0, tk.END)
+    # Switch back to the home page
+    switch_page(home_page)
 
 # Create a label for the entry box where the user enters the title of the new task
 title_label = tk.Label(
@@ -266,9 +291,10 @@ title_label = tk.Label(
 )
 
 # Create entry box where the user enters the title of the new task
-title_entry = tk.Entry(
+title_entry = tk.Text(
     add_task_page,
     font=TEXT_FONT,
+    height = 2,
 )
 
 # Create a label for the entry box where the user enters the description of the new task
@@ -281,9 +307,10 @@ description_label = tk.Label(
 )
 
 # Create the entry box where the user enters the description of the new task
-description_entry = tk.Entry(
+description_entry = tk.Text(
     add_task_page,
     font=TEXT_FONT,
+    height = 12,
 )
 
 # Makes both text entry boxes sticky left to right, however title entry box doesn't have to be very wide
@@ -355,7 +382,7 @@ view_task_page.columnconfigure(1, minsize = 300, weight=5)
 
 title_label = tk.Label(
     view_task_page,
-    text="Title",
+    text="Edit task",
     padx=10,
     pady=10,
     font=("Times New Roman", 50),
@@ -413,6 +440,8 @@ description_edit_entry.grid(row=2, column=1, columnspan=2, sticky="ew")
 # Save the information about the task that the user changed
 def save_task_info():
     task_id = view_task_page.current_task_id
+
+    # Gets the info from the title entry and description entry
     updated_title = title_edit_entry.get("1.0", "end-1c")
     updated_description = description_edit_entry.get("1.0", "end-1c")
 
@@ -448,6 +477,9 @@ def delete_task_info():
 
     # Refresh the home page card scroll bar so update shows up
     refresh_home_page_cards()
+
+    # Returns back to the home page since there is no task to display
+    switch_page(home_page)
 
 # Button that saves the entry the user has edited
 delete_button = tk.Button(
