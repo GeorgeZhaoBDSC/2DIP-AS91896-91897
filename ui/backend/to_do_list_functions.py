@@ -1,6 +1,6 @@
 import json
 
-FILE_PATH = "/Users/george/PycharmProjects/PythonProject/2DIP_Internal/tasks.json"
+FILE_PATH = "/Users/george/PycharmProjects/PythonProject/2DIP_Internal/Version3/ui/backend/tasks.json"
 
 # The maximum number of characters of the title to a task displayed on each card on the home page
 TITLE_LENGTH = 50
