@@ -18,6 +18,7 @@ def create_view_task_page(system_state):
     view_task_page.rowconfigure(1,minsize = 100, weight=1)
     view_task_page.rowconfigure(2,minsize = 200, weight=2)
     view_task_page.rowconfigure(3,minsize = 100, weight=1)
+    view_task_page.rowconfigure(4, minsize=100, weight=1)
 
 
     # The starting width of the window columns is 150/300/300px, and then expands with the ratio of 1:5:5
@@ -35,7 +36,7 @@ def create_view_task_page(system_state):
         text="Edit task",
         padx=10,
         pady=10,
-        font=("Times New Roman", 50),
+        font=TITLE_FONT,
         fg="white",
         bg="blue"
     )
@@ -89,6 +90,11 @@ def create_view_task_page(system_state):
         updated_title = title_edit_entry.get("1.0", "end-1c")
         updated_description = description_edit_entry.get("1.0", "end-1c")
 
+        # Gets the priority option the user inputs
+        priority = selected_priority.get()
+
+        print(priority)
+
         edit_task(task_id, updated_title, updated_description)
 
         # Refresh the home page card scroll bar so update shows up
@@ -106,7 +112,7 @@ def create_view_task_page(system_state):
         pady = 10,
     )
 
-    save_button.grid(row=3, column=2)
+    save_button.grid(row=4, column=2)
 
     # --------------------------------------- Delete button --------------------------------------
     # Deletes the task and clears entry box
@@ -136,7 +142,29 @@ def create_view_task_page(system_state):
         pady = 10,
     )
 
-    delete_button.grid(row=3, column=1)
+    delete_button.grid(row=4, column=1)
+
+    # --------------------------------------- PRIORITY SELECT --------------------------------------
+
+    # variable to store the selected option
+    selected_priority = tk.StringVar()
+    selected_priority.set(PRIORITY_OPTIONS[0])
+
+    # Create dropdown
+    dropdown = tk.OptionMenu(
+        view_task_page,
+        selected_priority,
+        *PRIORITY_OPTIONS,
+    )
+
+    # Places the dropdown into the grid
+
+    dropdown.grid(
+        row=3,
+        column=1,
+        padx=10,
+        pady=10,
+    )
 
     # --------------------------------------- Exit button --------------------------------------
 
@@ -150,7 +178,7 @@ def create_view_task_page(system_state):
         pady = 10,
     )
 
-    exit_button.grid(row=3, column=0)
+    exit_button.grid(row=4, column=0)
 
     def refresh_view_task_page_text():
         # Add the information about the current task for the user to view and edit from the View Task button on the home page

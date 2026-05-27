@@ -1,9 +1,15 @@
 import json
 
-FILE_PATH = "/Users/george/PycharmProjects/PythonProject/2DIP_Internal/Version3/ui/backend/tasks.json"
-
 # The maximum number of characters of the title to a task displayed on each card on the home page
 TITLE_LENGTH = 50
+
+TITLE_FONT = ("Times New Roman", 50)
+
+TEXT_FONT = ("Times New Roman", 12)
+
+PRIORITY_OPTIONS = ("Very improtnat", "kinda improtnat", "nahh")
+
+FILE_PATH = "/Users/george/PycharmProjects/PythonProject/2DIP_Internal/Version3/ui/backend/tasks.json"
 
 def access_tasks():
     with open(FILE_PATH, "r") as file:
@@ -30,7 +36,7 @@ def get_task_info(task_id):
 
 def get_shortened_title(task_id):
     title = task_list[task_id]["title"]
-    shortened_title = title[:50]
+    shortened_title = title[:TITLE_LENGTH]
     return shortened_title
 
 task_list = access_tasks()

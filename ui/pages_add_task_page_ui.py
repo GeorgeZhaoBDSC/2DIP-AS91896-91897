@@ -17,6 +17,7 @@ def create_add_task_page(system_state):
     # 100/200/100 px respectively and expand with ratio 1:2:1
     add_task_page.rowconfigure(1,minsize = 100, weight=1)
     add_task_page.rowconfigure(2,minsize = 200, weight=2)
+    add_task_page.rowconfigure(3, minsize=100, weight=1)
     add_task_page.rowconfigure(3,minsize = 100, weight=1)
 
 
@@ -33,7 +34,7 @@ def create_add_task_page(system_state):
         text="Add new task",
         padx=10,
         pady=10,
-        font=("Times New Roman", 50),
+        font=TITLE_FONT,
         fg="white",
         bg="blue"
     )
@@ -51,6 +52,11 @@ def create_add_task_page(system_state):
         # Clears the text boxes
         title_entry.delete("1.0", tk.END)
         description_entry.delete("1.0", tk.END)
+
+        # Gets the priority option the user inputs
+        priority = selected_priority.get()
+
+        print(priority)
 
         # Adds the new task to the list of tasks and also saves it to the json file
         add_new_task(title, description)
@@ -108,7 +114,29 @@ def create_add_task_page(system_state):
         pady = 10,
     )
 
-    submit_button.grid(row=3, column=1)
+    submit_button.grid(row=4, column=1)
+
+    # --------------------------------------- PRIORITY SELECT --------------------------------------
+
+    # variable to store the selected option
+    selected_priority = tk.StringVar()
+    selected_priority.set(PRIORITY_OPTIONS[0])
+
+    # Create dropdown
+    dropdown = tk.OptionMenu(
+        add_task_page,
+        selected_priority,
+        *PRIORITY_OPTIONS,
+    )
+
+    # Places the dropdown into the grid
+
+    dropdown.grid(
+        row=3,
+        column=1,
+        padx = 10,
+        pady = 10,
+    )
 
     # --------------------------------------- Exit button --------------------------------------
 
@@ -122,7 +150,7 @@ def create_add_task_page(system_state):
         pady = 10,
     )
 
-    exit_button.grid(row=3, column=0)
+    exit_button.grid(row=4, column=0)
 
     return add_task_page
 
