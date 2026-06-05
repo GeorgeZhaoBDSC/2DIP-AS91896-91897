@@ -25,17 +25,32 @@ def create_home_page(system_state):
 
     # Assigning properties to the title bar
 
-    title_label = tk.Label(
+    title_bar = tk.Frame(
         home_page,
-        text="To do list",
         padx=10,
-        pady=10,
-        font=("Times New Roman", 50),
-        fg="white",
-        bg="blue"
+        pady=20,
+        height = 100,
+        bg="lightgrey"
     )
 
-    title_label.grid(row=0, column=0, columnspan=2, sticky="nsew")
+    title_label = tk.Label(
+        title_bar,
+        text="To do list",
+        font=TITLE_FONT,
+        fg="black",
+        bg="lightgrey",
+        anchor="w",
+        relief="flat",
+    )
+
+    # Place title text in the title grid area
+    title_label.grid(
+        row=0,
+        column=0,
+        sticky="nsew"
+    )
+
+    title_bar.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
 
     # ------------------------------------- Left side bar ------------------------------------
@@ -43,7 +58,7 @@ def create_home_page(system_state):
         home_page,
         padx=20,
         pady=20,
-        bg="yellow"
+        bg="white"
     )
     left_container.grid(row=1, column=0, sticky="nsew")
 
@@ -59,8 +74,13 @@ def create_home_page(system_state):
         padx=20,
         pady=20,
         font=("Times New Roman", 18),
-        bg="white",
-        fg="black"
+        bg = "#2563EB",
+        fg = "black",
+        relief = "flat",
+        activebackground = "#D6D6D6",
+        bd = 0,
+        cursor = "hand",
+        highlightthickness = 0
     )
 
     add_task_button.grid(row=0, column=0, sticky="nsew")
@@ -74,26 +94,27 @@ def create_home_page(system_state):
     scroll_container.columnconfigure(0, weight=1)
 
     # --------------------------- Scroll bar elements configuration ---------------------------
+
+    # Create a scroll bar container
     canvas = tk.Canvas(scroll_container)
     canvas.grid(row=0, column=0, sticky="nsew")
 
-    # --- SCROLLBAR ---
+    # Defining scrolling element
     scrollbar = tk.Scrollbar(scroll_container, orient="vertical", command=canvas.yview)
     scrollbar.grid(row=0, column=1, sticky="ns")
-
     canvas.configure(yscrollcommand=scrollbar.set)
 
-    # --- FRAME INSIDE CANVAS ---
+    # Create a frame inside the canvas
     card_frame = tk.Frame(canvas)
     window_id = canvas.create_window((0, 0), window=card_frame, anchor="nw")
 
-    # --- SCROLL REGION UPDATE ---
+    # Define the region
     def update_scrollregion(event):
         canvas.configure(scrollregion=canvas.bbox("all"))
 
     card_frame.bind("<Configure>", update_scrollregion)
 
-    # --- KEEP WIDTH MATCHED ---
+    # Make the width the same as its container
     def resize_frame(event):
         canvas.itemconfig(window_id, width=event.width)
 
@@ -123,8 +144,8 @@ def create_home_page(system_state):
             parent,
             padx=10,
             pady=10,
-            relief="ridge",
-            bd = 2
+            highlightbackground="grey",
+            highlightthickness=1
         )
         # -------------------------------- Card Layout -------------------------------
 
@@ -141,9 +162,14 @@ def create_home_page(system_state):
             padx=5,
             pady=5,
             width=5,
-            font=("Times New Roman", 12),
-            bg="white",
-            fg="black"
+            font=TEXT_FONT,
+            bg="#2563EB",
+            fg="black",
+            relief="flat",
+            activebackground="#D6D6D6",
+            bd=0,
+            cursor="hand",
+            highlightthickness = 0
         )
 
         # Places button inside card grid area
@@ -156,7 +182,7 @@ def create_home_page(system_state):
             text=card_id+1,
             padx=0,
             pady=5,
-            font=("Times New Roman", 20),
+            font=TEXT_FONT,
             fg="black",
         )
 
@@ -173,6 +199,7 @@ def create_home_page(system_state):
             padx=0,
             pady=5,
             fg="black",
+            font = TEXT_FONT,
             anchor="w" # Aligns text to the left
         )
 
