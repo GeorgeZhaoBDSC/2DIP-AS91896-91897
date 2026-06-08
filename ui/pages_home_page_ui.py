@@ -33,25 +33,27 @@ def create_home_page(system_state):
         bg="lightgrey"
     )
 
+    title_bar.grid_columnconfigure(0, weight=1)
+
+    title_bar.grid(row=0, column=0, columnspan=2, sticky="nsew")
+
     title_label = tk.Label(
         title_bar,
         text="To do list",
         font=TITLE_FONT,
         fg="black",
         bg="lightgrey",
-        anchor="w",
         relief="flat",
+        anchor="center",
+        justify="center",
     )
 
     # Place title text in the title grid area
     title_label.grid(
         row=0,
         column=0,
-        sticky="nsew"
+        sticky=""
     )
-
-    title_bar.grid(row=0, column=0, columnspan=2, sticky="nsew")
-
 
     # ------------------------------------- Left side bar ------------------------------------
     left_container = tk.Frame(
@@ -80,7 +82,6 @@ def create_home_page(system_state):
         activebackground = "#D6D6D6",
         bd = 0,
         cursor = "hand",
-        highlightthickness = 0
     )
 
     add_task_button.grid(row=0, column=0, sticky="nsew")
