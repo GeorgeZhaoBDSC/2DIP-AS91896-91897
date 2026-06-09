@@ -10,6 +10,8 @@ def create_view_task_page(system_state):
 
     root = system_state["root"]
 
+    task_id = system_state["current_task"]
+
     # ----------------------------------- General Page setup ---------------------------------
     # Create a add task page
     view_task_page = tk.Frame(root)
@@ -37,8 +39,6 @@ def create_view_task_page(system_state):
         valid_input = check_input_validity()
         if not valid_input:
             return
-
-        task_id = system_state["current_task"]
 
         # Gets the info from the title entry and description entry
         updated_title = title_edit_entry.get("1.0", "end-1c")
@@ -96,10 +96,8 @@ def create_view_task_page(system_state):
     # --------------------------------------- Delete button --------------------------------------
     # Deletes the task and clears entry box
     def delete_task_info():
-        if not messagebox.askyesno("!!", "Are u sure u want to delete this task?"):
+        if not messagebox.askyesno("!!", "Are you sure you want to delete this task?"):
             return
-        
-        task_id = system_state["current_task"]
 
         title_edit_entry.delete("1.0", tk.END)
         description_edit_entry.delete("1.0", tk.END)
@@ -255,10 +253,35 @@ def create_view_task_page(system_state):
 
     # --------------------------------------- Exit button --------------------------------------
 
+    # A function that activates when the user exits the task
+    def exit_task():
+        # Gets the info from the title entry and description entry
+        updated_title = title_edit_entry.get("1.0", "end-1c")
+        updated_description = description_edit_entry.get("1.0", "end-1c")
+
+        # Gets the priority option the user inputs
+        priority = selected_priority.get()
+
+        # Gets the due date from the calendar dropdown
+        due_date = date_entry.get_date()
+
+        # Store the date in a better way so it doesn't break the JSON file
+        stored_date = due_date.strftime("%Y-%m-%d")
+
+        # Check if the user has made any changes:
+
+        changes = updated_title != task_list[task_id]["title"] or updated_description != task_list[task_id]["description"] or priority != task_list[task_id]["priority"] or stored_date != task_list[task_id]["date"]
+
+        if changes:
+            if messagebox.askyesno("!!", "You have unsaved changes. Would you like to save before exiting?"):
+                return
+
+        switch_page(system_state, "home")
+
     exit_button = tk.Button(
         view_task_page,
         text="Exit",
-        command=lambda: switch_page(system_state, "home"),
+        command=lambda: exit_task(),
         bg="green",
         fg="black",
         padx = 10,
@@ -269,8 +292,6 @@ def create_view_task_page(system_state):
 
     def refresh_view_task_page_text():
         # Add the information about the current task for the user to view and edit from the View Task button on the home page
-
-        task_id = system_state["current_task"]
 
         # Delete text in the entry boxes
         # Clears the title and description entry boxes on the view task page
