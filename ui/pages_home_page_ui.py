@@ -141,12 +141,19 @@ def create_home_page(system_state):
 
     # Creates each card with the information from each task
     def create_card(parent, card_id, row):
+
+        # Colour the border of each card depending on the importance of the card
+        # create a dictionary that maps the importance to the respective colour
+        colour_map = dict(zip(PRIORITY_OPTIONS, PRIORITY_COLOURS))
+
+        highlight_colour = colour_map[task_list[card_id]["priority"]]
+
         card = tk.Frame(
             parent,
             padx=10,
             pady=10,
-            highlightbackground="grey",
-            highlightthickness=1
+            highlightbackground=highlight_colour,
+            highlightthickness=2,
         )
         # -------------------------------- Card Layout -------------------------------
 
