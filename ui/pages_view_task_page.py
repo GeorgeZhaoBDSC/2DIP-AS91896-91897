@@ -274,6 +274,9 @@ def create_view_task_page(system_state):
 
     # A function that activates when the user exits the task
     def exit_task():
+        # Reassign the task_id that might have changed.
+        task_id = system_state["current_task"]
+        
         # Gets the info from the title entry and description entry
         updated_title = title_edit_entry.get("1.0", "end-1c")
         updated_description = description_edit_entry.get("1.0", "end-1c")
@@ -310,6 +313,10 @@ def create_view_task_page(system_state):
     exit_button.grid(row=4, column=0)
 
     def refresh_view_task_page_text():
+
+        # Reassign the task_id that might have changed.
+        task_id = system_state["current_task"]
+
         # Add the information about the current task for the user to view and edit from the View Task button on the home page
 
         # Delete text in the entry boxes

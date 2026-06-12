@@ -201,10 +201,11 @@ def create_add_task_page(system_state):
     selected_priority.set(PRIORITY_OPTIONS[0])
 
     # Create dropdown
+    # The last element is removed as it is COMPLETE. The program does not allow the user to add a task that is already done.
     dropdown = tk.OptionMenu(
         dropdown_area,
         selected_priority,
-        *PRIORITY_OPTIONS,
+        *PRIORITY_OPTIONS[:-1],
     )
 
     # Places the dropdown into the grid
@@ -262,4 +263,3 @@ def create_add_task_page(system_state):
     exit_button.grid(row=4, column=0)
 
     return add_task_page
-
