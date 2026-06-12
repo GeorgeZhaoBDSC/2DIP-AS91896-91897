@@ -81,7 +81,7 @@ def create_home_page(system_state):
         relief = "flat",
         activebackground = "#D6D6D6",
         bd = 0,
-        cursor = "hand",
+        cursor = "hand1",
     )
 
     add_task_button.grid(row=0, column=0, sticky="nsew")
@@ -176,7 +176,7 @@ def create_home_page(system_state):
             relief="flat",
             activebackground="#D6D6D6",
             bd=0,
-            cursor="hand",
+            cursor="hand1",
             highlightthickness = 0
         )
 

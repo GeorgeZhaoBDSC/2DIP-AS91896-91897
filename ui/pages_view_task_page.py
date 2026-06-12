@@ -30,7 +30,7 @@ def create_view_task_page(system_state):
     # The starting width of the window columns is 150/300/300px, and then expands with the ratio of 1:5:5
     view_task_page.columnconfigure(0, minsize = 150, weight=1)
     view_task_page.columnconfigure(1, minsize = 300, weight=5)
-    view_task_page.columnconfigure(1, minsize = 300, weight=5)
+    view_task_page.columnconfigure(2, minsize = 300, weight=5)
 
     # --------------------------------------- Save Task --------------------------------------
     # Save the information about the task that the user changed
@@ -67,7 +67,7 @@ def create_view_task_page(system_state):
         # If current date is after the due date, return invalid input and notify user
         today = date.today()
         if due_date < today:
-            return messagebox.askyesno("!!", "Your task is overdue. Do yo want to change the due date?")
+            return messagebox.askyesno("!!", "Your task is overdue. Do you want to change the due date?")
 
         # If title is blank, notify user, return invalid input
         if title == "":
@@ -76,7 +76,7 @@ def create_view_task_page(system_state):
 
         # If description is blank, notify user, give option to continue without a descrpiton
         if description == "":
-            return messagebox.askyesno("!!", "Your task does not have description. Do yo want to save the task?")
+            return messagebox.askyesno("!!", "Your task does not have description. Do you want to save the task?")
 
         return True
 
@@ -191,10 +191,10 @@ def create_view_task_page(system_state):
     # Makes both text boxes sticky left to right, however title text box doesn't have to be very wide
     # so it is not sticky top to bottom like the description entry box
     title_edit_label.grid(row=1, column=0, sticky="ew")
-    title_edit_entry.grid(row=1, column=1, columnspan=2, sticky="ew")
+    title_edit_entry.grid(row=1, column=1, columnspan=2, sticky="ew", padx=(0, 20))
 
     description_edit_label.grid(row=2, column=0, sticky="ew")
-    description_edit_entry.grid(row=2, column=1, columnspan=2, sticky="ew")
+    description_edit_entry.grid(row=2, column=1, columnspan=2, sticky="ew", padx=(0, 20))
 
 
     # --------------------------------------- Dropdown select --------------------------------------
@@ -209,7 +209,7 @@ def create_view_task_page(system_state):
     dropdown_area.grid(
         row=3,
         column=0,
-        columnspan=2,
+        columnspan=3,
         sticky="nsew"
     )
 
@@ -280,7 +280,7 @@ def create_view_task_page(system_state):
 
     exit_button = tk.Button(
         view_task_page,
-        text="Exit",
+        text="Return to Home",
         command=lambda: exit_task(),
         bg="green",
         fg="black",

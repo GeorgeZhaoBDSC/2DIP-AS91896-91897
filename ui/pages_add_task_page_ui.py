@@ -21,12 +21,12 @@ def create_add_task_page(system_state):
     add_task_page.rowconfigure(1,minsize = 100, weight=1)
     add_task_page.rowconfigure(2,minsize = 150, weight=2)
     add_task_page.rowconfigure(3, minsize=50, weight=1)
-    add_task_page.rowconfigure(3,minsize = 100, weight=1)
+    add_task_page.rowconfigure(4,minsize = 100, weight=1)
 
 
     # The starting width of the window columns is 150/600px, and then expands with the ratio of 1:5
     add_task_page.columnconfigure(0, minsize = 150, weight=1)
-    add_task_page.columnconfigure(1, minsize = 600, weight=5)
+    add_task_page.columnconfigure(1, pad=20, minsize = 600, weight=5)
 
 
     # --------------------------------------- Submit Function --------------------------------------
@@ -161,10 +161,10 @@ def create_add_task_page(system_state):
     # Makes both text entry boxes sticky left to right, however title entry box doesn't have to be very wide
     # so it is not sticky top to bottom like the description entry box
     title_label.grid(row=1, column=0, sticky="ew")
-    title_entry.grid(row=1, column=1, sticky="ew")
+    title_entry.grid(row=1, column=1, sticky="ew", padx=(0, 20))
 
     description_label.grid(row=2, column=0, sticky="nsew")
-    description_entry.grid(row=2, column=1, sticky="nsew")
+    description_entry.grid(row=2, column=1, sticky="nsew", padx=(0, 20))
 
     # Button that submits the entry
     submit_button = tk.Button(
@@ -237,7 +237,7 @@ def create_add_task_page(system_state):
 
     exit_button = tk.Button(
         add_task_page,
-        text="Exit",
+        text="Return to Home",
         command=lambda: switch_page(system_state, "home"),
         bg="green",
         fg="black",
