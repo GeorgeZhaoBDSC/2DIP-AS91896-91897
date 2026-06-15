@@ -58,6 +58,9 @@ def create_view_task_page(system_state):
         # Refresh the home page card scroll bar so update shows up
         system_state["refresh_pages"]["home"]()
 
+        # Switch back to the home page
+        switch_page(system_state, "home")
+
     def check_input_validity():
         # Get the title, description, and due date the user has input
         title = title_edit_entry.get("1.0", "end-1c")
@@ -276,7 +279,7 @@ def create_view_task_page(system_state):
     def exit_task():
         # Reassign the task_id that might have changed.
         task_id = system_state["current_task"]
-        
+
         # Gets the info from the title entry and description entry
         updated_title = title_edit_entry.get("1.0", "end-1c")
         updated_description = description_edit_entry.get("1.0", "end-1c")
@@ -292,12 +295,13 @@ def create_view_task_page(system_state):
 
         # Check if the user has made any changes:
 
-        changes = updated_title != task_list[task_id]["title"] or updated_description != task_list[task_id]["description"] or priority != task_list[task_id]["priority"] or stored_date != task_list[task_id]["date"]
+        changes = updated_title != task_list[task_id[0]][task_id[1]]["title"] or updated_description != task_list[task_id[0]][task_id[1]]["description"] or priority != task_list[task_id[0]][task_id[1]]["priority"] or stored_date != task_list[task_id[0]][task_id[1]]["date"]
 
         if changes:
             if messagebox.askyesno("!!", "You have unsaved changes. Would you like to save before exiting?"):
                 return
 
+        # Switch back to the home page
         switch_page(system_state, "home")
 
     exit_button = tk.Button(
@@ -326,13 +330,13 @@ def create_view_task_page(system_state):
 
         # Insert the correct text back in
         # Writes new title and description into those 2 entry boxes on the view task page
-        title_edit_entry.insert("1.0", task_list[task_id]["title"])
-        description_edit_entry.insert("1.0", task_list[task_id]["description"])
+        title_edit_entry.insert("1.0", task_list[task_id[0]][task_id[1]]["title"])
+        description_edit_entry.insert("1.0", task_list[task_id[0]][task_id[1]]["description"])
 
         # Write the selected priority option into the priority box
-        selected_priority.set(task_list[task_id]["priority"])
+        selected_priority.set(task_list[task_id[0]][task_id[1]]["priority"])
 
-        stored_date = task_list[task_id]["date"]
+        stored_date = task_list[task_id[0]][task_id[1]]["date"]
         # Convert the stored date format back into a DateEntry usable format
         due_date = dt.strptime(stored_date, "%Y-%m-%d").date()
 

@@ -216,10 +216,10 @@ def create_home_page(system_state):
     # Configure the button on each scroll bar card such that it takes the user to the view task page and displays
     # the correct information that corresponds to the card.
 
-    def open_view_task_page(card_id):
+    def open_view_task_page(task_id):
         # store selected task id on the view task page so the information of the current task is accessible
         # from the view task page
-        system_state["current_task"] = card_id
+        system_state["current_task"] = task_id
         switch_page(system_state, "view_task")
 
         # Refreshes the text boxes on the add task page so it displays the correct text for the respective task
@@ -230,13 +230,13 @@ def create_home_page(system_state):
 
 
     # Creates each card with the information from each task
-    def create_card(parent, card_id, row):
+    def create_card(parent, task_id, row):
 
         # Colour the border of each card depending on the importance of the card
         # create a dictionary that maps the importance to the respective colour
         colour_map = dict(zip(PRIORITY_OPTIONS, PRIORITY_COLOURS))
 
-        highlight_colour = colour_map[task_list[card_id]["priority"]]
+        highlight_colour = colour_map[task_list[task_id[0]][task_id[1]]["priority"]]
 
         card = tk.Frame(
             parent,
@@ -256,7 +256,7 @@ def create_home_page(system_state):
         card_button = tk.Button(
             card,
             text="View task",
-            command=lambda: open_view_task_page(card_id),
+            command=lambda: open_view_task_page(task_id),
             padx=5,
             pady=5,
             width=5,
@@ -277,7 +277,7 @@ def create_home_page(system_state):
 
         card_label = tk.Label(
             card,
-            text=card_id+1,
+            text=task_id[1]+1,
             padx=0,
             pady=5,
             font=TEXT_FONT,
@@ -289,7 +289,7 @@ def create_home_page(system_state):
         # Display the title of the task on each card
 
         # title is shortened to fit the frame, there is a max number of characters
-        shortened_title = get_shortened_title(card_id)
+        shortened_title = get_shortened_title(task_id)
 
         card_title = tk.Label(
             card,
@@ -318,11 +318,13 @@ def create_home_page(system_state):
     # Creates a card for every to do list item, and also updates it when any changes are made to the list of tasks
     # So that the new cards also show up
     def refresh_home_page():
+        task_id = system_state["current_task"]
+
         for widget in card_frame.winfo_children():
             widget.destroy()
 
-        for i in range(len(task_list)):
-            create_card(card_frame, i, i)
+        for i in range(len(task_list[task_id[0]])):
+            create_card(card_frame, [task_id[0], task_id[1]], i)
 
         for widget in btn_frame.winfo_children():
             widget.destroy()

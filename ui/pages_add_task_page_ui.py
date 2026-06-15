@@ -33,6 +33,7 @@ def create_add_task_page(system_state):
 
     # Submit the info the user has entered in all the fields of the form
     def submit_new_task():
+        task_id = system_state["current_task"]
         # Check the validity of the input
         valid_input = check_input_validity()
         if not valid_input:
@@ -61,7 +62,7 @@ def create_add_task_page(system_state):
         date_entry.set_date(date.today())
 
         # Adds the new task to the list of tasks and also saves it to the json file
-        add_new_task(title, description, priority, stored_date)
+        add_new_task(title, description, priority, stored_date, task_id[0])
 
         # Refreshes the home page so that the new cards show up on the home page
         system_state["refresh_pages"]["home"]()

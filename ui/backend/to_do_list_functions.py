@@ -24,26 +24,27 @@ def save_tasks():
     with open(FILE_PATH, "w") as file:
         json.dump(task_list, file)
 
-def add_new_task(title, description, priority, date):
-    task_list.append({"title": title, "description": description, "priority": priority, "date": date})
+def add_new_task(title, description, priority, date, list_number):
+    task_list[list_number].append({"title": title, "description": description, "priority": priority, "date": date})
     # Sort the tasks in order of priority/date
     sort_tasks()
     save_tasks()
 
 def edit_task(task_id, title, description, priority, date):
-    task_list[task_id] = {"title": title, "description": description, "priority": priority, "date": date}
+    task_list[task_id[0]][task_id[1]] = {"title": title, "description": description, "priority": priority, "date": date}
+    # Sort the tasks in order of priority/date
     save_tasks()
 
 def delete_task(task_id):
-    del task_list[task_id]
+    del task_list[task_id[0]][task_id[1]]
     save_tasks()
 
 def get_task_info(task_id):
-    return task_list[task_id]
+    return task_list[task_id[0]][task_id[1]]
 
 def get_shortened_title(task_id):
     # Get the title for the task and shorten it to at most TITLE_LENGTH
-    title = task_list[task_id]["title"]
+    title = task_list[task_id[0]][task_id[1]]["title"]
     shortened_title = title[:TITLE_LENGTH]
     return shortened_title
 
@@ -51,12 +52,13 @@ def sort_tasks():
     # Create a dictionary that converts between the priority options and their order in numbers (0, 1, 2...)
     priority_map = {PRIORITY_OPTIONS[i]:i for i in range(len(PRIORITY_OPTIONS))}
 
-    # Sorts the task list. First based on priority, then within the same priority, sort by due date
-    task_list.sort(
-        key=lambda task: (
-            priority_map[task["priority"]],
-            task["date"]
+    # Sorts each task list. First based on priority, then within the same priority, sort by due date
+    for i in range(len(task_list)):
+        task_list[i].sort(
+            key=lambda task: (
+                priority_map[task["priority"]],
+                task["date"]
+            )
         )
-    )
 
 task_list = access_tasks()
