@@ -25,26 +25,26 @@ def save_tasks():
         json.dump(task_list, file)
 
 def add_new_task(title, description, priority, date, list_number):
-    task_list[list_number].append({"title": title, "description": description, "priority": priority, "date": date})
+    task_list[list(task_list.keys())[list_number]].append({"title": title, "description": description, "priority": priority, "date": date})
     # Sort the tasks in order of priority/date
     sort_tasks()
     save_tasks()
 
 def edit_task(task_id, title, description, priority, date):
-    task_list[task_id[0]][task_id[1]] = {"title": title, "description": description, "priority": priority, "date": date}
+    task_list[list(task_list.keys())[task_id[0]]][task_id[1]] = {"title": title, "description": description, "priority": priority, "date": date}
     # Sort the tasks in order of priority/date
     save_tasks()
 
 def delete_task(task_id):
-    del task_list[task_id[0]][task_id[1]]
+    del task_list[list(task_list.keys())[task_id[0]]][task_id[1]]
     save_tasks()
 
 def get_task_info(task_id):
-    return task_list[task_id[0]][task_id[1]]
+    return list(task_list.values())[task_id[0]][task_id[1]]
 
 def get_shortened_title(task_id):
     # Get the title for the task and shorten it to at most TITLE_LENGTH
-    title = task_list[task_id[0]][task_id[1]]["title"]
+    title = list(task_list.values())[task_id[0]][task_id[1]]["title"]
     shortened_title = title[:TITLE_LENGTH]
     return shortened_title
 
@@ -54,7 +54,7 @@ def sort_tasks():
 
     # Sorts each task list. First based on priority, then within the same priority, sort by due date
     for i in range(len(task_list)):
-        task_list[i].sort(
+        task_list[list(task_list.keys())[i]].sort(
             key=lambda task: (
                 priority_map[task["priority"]],
                 task["date"]

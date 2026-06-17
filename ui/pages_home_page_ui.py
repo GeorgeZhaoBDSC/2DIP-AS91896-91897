@@ -156,11 +156,20 @@ def create_home_page(system_state):
     btn_frame.bind("<Configure>", update_btn_scrollregion)
     btn_canvas.bind("<Configure>", resize_btn_frame)
 
+    def switch_list(list_id):
+        system_state["current_task"][0] = list_id
+        system_state["refresh_pages"]["home"]()
+
     # Create the button for each list
     def create_button(list_id):
+        # Title of the button is the title of the To do list
+        button_text = list(task_list.keys())[list_id]
+
+        # Style for the button
         button = tk.Button(
             btn_frame,
-            text=f"hii",
+            text=button_text,
+            command=lambda: switch_list(list_id),
             padx=10,
             pady=10,
             font=TEXT_FONT,
@@ -173,6 +182,10 @@ def create_home_page(system_state):
         )
 
         button.grid(row=list_id, column=0, sticky="nsew", pady=5)
+
+    # Creates all of the buttons
+    for i in range(len(task_list)):
+        create_button(i)
 
 
     # =========================================== Tasks cards (right side) ===========================================
@@ -230,13 +243,13 @@ def create_home_page(system_state):
 
 
     # Creates each card with the information from each task
-    def create_card(parent, task_id, row):
+    def create_card(parent, task_id):
 
         # Colour the border of each card depending on the importance of the card
         # create a dictionary that maps the importance to the respective colour
         colour_map = dict(zip(PRIORITY_OPTIONS, PRIORITY_COLOURS))
 
-        highlight_colour = colour_map[task_list[task_id[0]][task_id[1]]["priority"]]
+        highlight_colour = colour_map[list(task_list.values())[task_id[0]][task_id[1]]["priority"]]
 
         card = tk.Frame(
             parent,
@@ -305,7 +318,7 @@ def create_home_page(system_state):
 
         # Place the card inside the scrolling frame
         card.grid(
-            row=row,
+            row=task_id[1],
             column=0,
             sticky="ew",
             padx=10,
@@ -320,18 +333,15 @@ def create_home_page(system_state):
     def refresh_home_page():
         task_id = system_state["current_task"]
 
+        # Deletes all cards and rebuild them so that new information from the updated task_list is shown
         for widget in card_frame.winfo_children():
             widget.destroy()
 
-        for i in range(len(task_list[task_id[0]])):
-            create_card(card_frame, [task_id[0], task_id[1]], i)
-
-        for widget in btn_frame.winfo_children():
-            widget.destroy()
-
-        for i in range(5):
-            create_button(i)
+        for i in range(len(list(task_list.values())[task_id[0]])):
+            create_card(card_frame, [task_id[0], i])
 
     refresh_home_page()
 
     return home_page, refresh_home_page
+
+

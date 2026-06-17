@@ -145,7 +145,7 @@ def create_view_task_page(system_state):
 
     title_label = tk.Label(
         title_bar,
-        text="View Task Page",
+        text="Edit Task",
         font=TITLE_FONT,
         fg="black",
         bg="lightgrey",
@@ -293,9 +293,8 @@ def create_view_task_page(system_state):
         # Store the date in a better way so it doesn't break the JSON file
         stored_date = due_date.strftime("%Y-%m-%d")
 
-        # Check if the user has made any changes:
-
-        changes = updated_title != task_list[task_id[0]][task_id[1]]["title"] or updated_description != task_list[task_id[0]][task_id[1]]["description"] or priority != task_list[task_id[0]][task_id[1]]["priority"] or stored_date != task_list[task_id[0]][task_id[1]]["date"]
+        # Check if the user has made any changes to any of the fields
+        changes = updated_title != list(task_list.values())[task_id[0]][task_id[1]]["title"] or updated_description != list(task_list.values())[task_id[0]][task_id[1]]["description"] or priority != list(task_list.values())[task_id[0]][task_id[1]]["priority"] or stored_date != list(task_list.values())[task_id[0]][task_id[1]]["date"]
 
         if changes:
             if messagebox.askyesno("!!", "You have unsaved changes. Would you like to save before exiting?"):
@@ -330,13 +329,13 @@ def create_view_task_page(system_state):
 
         # Insert the correct text back in
         # Writes new title and description into those 2 entry boxes on the view task page
-        title_edit_entry.insert("1.0", task_list[task_id[0]][task_id[1]]["title"])
-        description_edit_entry.insert("1.0", task_list[task_id[0]][task_id[1]]["description"])
+        title_edit_entry.insert("1.0", list(task_list.values())[task_id[0]][task_id[1]]["title"])
+        description_edit_entry.insert("1.0", list(task_list.values())[task_id[0]][task_id[1]]["description"])
 
         # Write the selected priority option into the priority box
-        selected_priority.set(task_list[task_id[0]][task_id[1]]["priority"])
+        selected_priority.set(list(task_list.values())[task_id[0]][task_id[1]]["priority"])
 
-        stored_date = task_list[task_id[0]][task_id[1]]["date"]
+        stored_date = list(task_list.values())[task_id[0]][task_id[1]]["date"]
         # Convert the stored date format back into a DateEntry usable format
         due_date = dt.strptime(stored_date, "%Y-%m-%d").date()
 

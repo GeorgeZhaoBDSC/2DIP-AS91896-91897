@@ -113,7 +113,7 @@ def create_add_task_page(system_state):
 
     title_label = tk.Label(
         title_bar,
-        text="To do list",
+        text="Add Task",
         font=TITLE_FONT,
         fg="black",
         bg="lightgrey",
