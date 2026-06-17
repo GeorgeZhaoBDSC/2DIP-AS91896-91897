@@ -29,7 +29,7 @@ def create_add_task_page(system_state):
     add_task_page.columnconfigure(1, pad=20, minsize = 600, weight=5)
 
 
-    # --------------------------------------- Submit Function --------------------------------------
+    # --------------------------------------- Submit form Functions --------------------------------------
 
     # Submit the info the user has entered in all the fields of the form
     def submit_new_task():
@@ -96,171 +96,185 @@ def create_add_task_page(system_state):
 
 
     # --------------------------------------- Title Bar --------------------------------------
+    def create_title_bar():
+        # Assigning properties to the title bar
+        title_bar = tk.Frame(
+            add_task_page,
+            padx=10,
+            pady=20,
+            height = 100,
+            bg="lightgrey"
+        )
 
-    # Assigning properties to the title bar
+        title_bar.grid_columnconfigure(0, weight=1)
 
-    title_bar = tk.Frame(
-        add_task_page,
-        padx=10,
-        pady=20,
-        height = 100,
-        bg="lightgrey"
-    )
+        title_bar.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-    title_bar.grid_columnconfigure(0, weight=1)
+        title_label = tk.Label(
+            title_bar,
+            text="Add Task",
+            font=TITLE_FONT,
+            fg="black",
+            bg="lightgrey",
+            relief="flat",
+            anchor="center",
+            justify="center",
+        )
 
-    title_bar.grid(row=0, column=0, columnspan=2, sticky="nsew")
-
-    title_label = tk.Label(
-        title_bar,
-        text="Add Task",
-        font=TITLE_FONT,
-        fg="black",
-        bg="lightgrey",
-        relief="flat",
-        anchor="center",
-        justify="center",
-    )
-
-    # Place title text in the title grid area
-    title_label.grid(row=0, column=0, sticky="")
+        # Place title text in the title grid area
+        title_label.grid(row=0, column=0, sticky="")
 
     # ------------------------------------ Title/Description Entry -----------------------------------
 
-    # Create a label for the entry box where the user enters the title of the new task
-    title_label = tk.Label(
-        add_task_page,
-        text="Title: ",
-        padx=20,
-        pady=10,
-    )
+    def create_title_description_entry():
+        # Create a label for the entry box where the user enters the title of the new task
+        title_label = tk.Label(
+            add_task_page,
+            text="Title: ",
+            padx=20,
+            pady=10,
+        )
 
-    # Create entry box where the user enters the title of the new task
-    title_entry = tk.Text(
-        add_task_page,
-        height = 2,
-    )
+        # Create entry box where the user enters the title of the new task
+        title_entry = tk.Text(
+            add_task_page,
+            height = 2,
+        )
 
-    # Create a label for the entry box where the user enters the description of the new task
-    description_label = tk.Label(
-        add_task_page,
-        text="Description:",
-        padx=20,
-        pady=10,
-    )
+        # Create a label for the entry box where the user enters the description of the new task
+        description_label = tk.Label(
+            add_task_page,
+            text="Description:",
+            padx=20,
+            pady=10,
+        )
 
-    # Create the entry box where the user enters the description of the new task
-    description_entry = tk.Text(
-        add_task_page,
-        height = 12,
-    )
+        # Create the entry box where the user enters the description of the new task
+        description_entry = tk.Text(
+            add_task_page,
+            height = 12,
+        )
 
-    # Makes both text entry boxes sticky left to right, however title entry box doesn't have to be very wide
-    # so it is not sticky top to bottom like the description entry box
-    title_label.grid(row=1, column=0, sticky="ew")
-    title_entry.grid(row=1, column=1, sticky="ew", padx=(0, 20))
+        # Makes both text entry boxes sticky left to right, however title entry box doesn't have to be very wide
+        # so it is not sticky top to bottom like the description entry box
+        title_label.grid(row=1, column=0, sticky="ew")
+        title_entry.grid(row=1, column=1, sticky="ew", padx=(0, 20))
 
-    description_label.grid(row=2, column=0, sticky="nsew")
-    description_entry.grid(row=2, column=1, sticky="nsew", padx=(0, 20))
+        description_label.grid(row=2, column=0, sticky="nsew")
+        description_entry.grid(row=2, column=1, sticky="nsew", padx=(0, 20))
 
-    # Button that submits the entry
-    submit_button = tk.Button(
-        add_task_page,
-        text="Submit",
-        command=lambda: submit_new_task(),
-        bg="green",
-        fg="black",
-        padx = 15,
-        pady = 10,
-    )
+        return title_entry, description_entry
 
-    submit_button.grid(row=4, column=1)
+    # ------------------------------------ Submit form -----------------------------------
 
-    # --------------------------------------- Dropdown select --------------------------------------
+    def submit_form_button():
+        # Button that submits the entry
+        submit_button = tk.Button(
+            add_task_page,
+            text="Submit",
+            command=lambda: submit_new_task(),
+            bg="green",
+            fg="black",
+            padx=15,
+            pady=10,
+        )
 
-    # Add a frame for the dropdown select buttons
-    dropdown_area = tk.Frame(
-        add_task_page,
-        padx=10,
-        pady=10,
-    )
+        submit_button.grid(row=4, column=1)
 
-    dropdown_area.grid(
-        row=3,
-        column=0,
-        columnspan=2,
-        sticky="nsew"
-    )
+    # --------------------------------------- Dropdown select area --------------------------------------
 
-    # Define the sizes of the columns in this nested grid
-    dropdown_area.columnconfigure(0, weight=1)
-    dropdown_area.columnconfigure(1, weight=1)
+    def create_dropdown_area():
+        # Add a frame for the dropdown select buttons
+        dropdown_area = tk.Frame(
+            add_task_page,
+            padx=10,
+            pady=10,
+        )
 
-    # Priority Select button
-    # variable to store the selected option
-    selected_priority = tk.StringVar()
-    selected_priority.set(PRIORITY_OPTIONS[0])
+        dropdown_area.grid(
+            row=3,
+            column=0,
+            columnspan=2,
+            sticky="nsew"
+        )
 
-    # Create dropdown
-    # The last element is removed as it is COMPLETE. The program does not allow the user to add a task that is already done.
-    dropdown = tk.OptionMenu(
-        dropdown_area,
-        selected_priority,
-        *PRIORITY_OPTIONS[:-1],
-    )
+        # Define the sizes of the columns in this nested grid
+        dropdown_area.columnconfigure(0, weight=1)
+        dropdown_area.columnconfigure(1, weight=1)
 
-    # Places the dropdown into the grid
-    dropdown.grid(
-        row=1,
-        column=0,
-        padx = 10,
-        pady = 10,
-        sticky=""
-    )
+        # Priority Select button
+        # variable to store the selected option
+        selected_priority = tk.StringVar()
+        selected_priority.set(PRIORITY_OPTIONS[0])
 
-    # Due Date Select button
-    date_entry = DateEntry(
-        dropdown_area,
-        width=12
-    )
-    # Places the dropdown into the grid
-    date_entry.grid(
-        row=1,
-        column=1,
-        pady=20,
-        padx=20,
-    )
+        # Create dropdown
+        # The last element is removed as it is COMPLETE. The program does not allow the user to add a task that is already done.
+        dropdown = tk.OptionMenu(
+            dropdown_area,
+            selected_priority,
+            *PRIORITY_OPTIONS[:-1],
+        )
 
-    # Created labels for the two dropdowns
+        # Places the dropdown into the grid
+        dropdown.grid(
+            row=1,
+            column=0,
+            padx = 10,
+            pady = 10,
+            sticky=""
+        )
 
-    priority_label = tk.Label(
-        dropdown_area,
-        text="Importance: ",
-        font=TEXT_FONT,
-        fg="black",
-    )
-    priority_label.grid(row=0, column=0, sticky="")
+        # Due Date Select button
+        date_entry = DateEntry(
+            dropdown_area,
+            width=12
+        )
+        # Places the dropdown into the grid
+        date_entry.grid(
+            row=1,
+            column=1,
+            pady=20,
+            padx=20,
+        )
 
-    date_label = tk.Label(
-        dropdown_area,
-        text="Due date: ",
-        font=TEXT_FONT,
-        fg="black",
-    )
-    date_label.grid(row=0, column=1, sticky="")
+        # Created labels for the two dropdowns
+
+        priority_label = tk.Label(
+            dropdown_area,
+            text="Importance: ",
+            font=TEXT_FONT,
+            fg="black",
+        )
+        priority_label.grid(row=0, column=0, sticky="")
+
+        date_label = tk.Label(
+            dropdown_area,
+            text="Due date: ",
+            font=TEXT_FONT,
+            fg="black",
+        )
+        date_label.grid(row=0, column=1, sticky="")
+
+        return selected_priority, date_entry
 
     # --------------------------------------- Exit button --------------------------------------
+    def create_exit_button():
+        exit_button = tk.Button(
+            add_task_page,
+            text="Home",
+            command=lambda: switch_page(system_state, "home"),
+            bg="green",
+            fg="black",
+            padx = 10,
+            pady = 10,
+        )
 
-    exit_button = tk.Button(
-        add_task_page,
-        text="Home",
-        command=lambda: switch_page(system_state, "home"),
-        bg="green",
-        fg="black",
-        padx = 10,
-        pady = 10,
-    )
-
-    exit_button.grid(row=4, column=0)
+        exit_button.grid(row=4, column=0)
+ #= =================================#= =================================#= =================================
+    create_title_bar()
+    title_entry, description_entry = create_title_description_entry()
+    submit_form_button()
+    selected_priority, date_entry = create_dropdown_area()
+    create_exit_button()
 
     return add_task_page
