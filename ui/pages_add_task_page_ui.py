@@ -4,38 +4,44 @@ from tkinter import messagebox
 from datetime import date
 from .backend.to_do_list_functions import *
 from .backend.navigation import *
+from .backend. refresh import *
+
 
 def create_add_task_page(system_state):
+    # ============================================= CREATE PAGE =============================================
 
     root = system_state["root"]
-
-    # ----------------------------------- General Page setup ---------------------------------
     # Create a add task page
     add_task_page = tk.Frame(root)
 
-    # Places page in the root frame
-    add_task_page.grid(row=0, column=0, sticky="nsew")
+    # ============================================= PAGE SETUP =============================================
 
-    # Expandable window: Top row stays constant width, the next 3 rows that contain the entry fields have width
-    # 100/200/100 px respectively and expand with ratio 1:2:1
-    add_task_page.rowconfigure(1,minsize = 100, weight=1)
-    add_task_page.rowconfigure(2,minsize = 150, weight=2)
-    add_task_page.rowconfigure(3, minsize=50, weight=1)
-    add_task_page.rowconfigure(4,minsize = 100, weight=1)
+    def page_setup():
+        # Places page in the root frame
+        add_task_page.grid(row=0, column=0, sticky="nsew")
+
+        # Expandable window: Top row stays constant width, the next 3 rows that contain the entry fields have width
+        # 100/200/100 px respectively and expand with ratio 1:2:1
+        add_task_page.rowconfigure(1,minsize = 100, weight=1)
+        add_task_page.rowconfigure(2,minsize = 150, weight=2)
+        add_task_page.rowconfigure(3, minsize=50, weight=1)
+        add_task_page.rowconfigure(4,minsize = 100, weight=1)
 
 
-    # The starting width of the window columns is 150/600px, and then expands with the ratio of 1:5
-    add_task_page.columnconfigure(0, minsize = 150, weight=1)
-    add_task_page.columnconfigure(1, pad=20, minsize = 600, weight=5)
+        # The starting width of the window columns is 150/600px, and then expands with the ratio of 1:5
+        add_task_page.columnconfigure(0, minsize = 150, weight=1)
+        add_task_page.columnconfigure(1, pad=20, minsize = 600, weight=5)
 
+    # ============================================= PAGE CONTENTS =============================================
 
     # --------------------------------------- Submit form Functions --------------------------------------
 
     # Submit the info the user has entered in all the fields of the form
-    def submit_new_task():
+    def submit_new_task(entries):
+        title_entry, description_entry, selected_priority, date_entry = entries
         task_id = system_state["current_task"]
         # Check the validity of the input
-        valid_input = check_input_validity()
+        valid_input = check_input_validity(entries)
         if not valid_input:
             return
 
@@ -71,7 +77,8 @@ def create_add_task_page(system_state):
         switch_page(system_state, "home")
 
     # A function to check whether the input is valid
-    def check_input_validity():
+    def check_input_validity(entries):
+        title_entry, description_entry, selected_priority, date_entry = entries
         # Get the title, description, and due date the user has input
         title = title_entry.get("1.0", "end-1c")
         description = description_entry.get("1.0", "end-1c")
@@ -124,9 +131,10 @@ def create_add_task_page(system_state):
         # Place title text in the title grid area
         title_label.grid(row=0, column=0, sticky="")
 
-    # ------------------------------------ Title/Description Entry -----------------------------------
+    # ------------------------------------------ Form Entry -----------------------------------------
 
-    def create_title_description_entry():
+    def create_entry_fields():
+        # ----------------------------- Title/Description Entry ----------------------------
         # Create a label for the entry box where the user enters the title of the new task
         title_label = tk.Label(
             add_task_page,
@@ -163,27 +171,7 @@ def create_add_task_page(system_state):
         description_label.grid(row=2, column=0, sticky="nsew")
         description_entry.grid(row=2, column=1, sticky="nsew", padx=(0, 20))
 
-        return title_entry, description_entry
-
-    # ------------------------------------ Submit form -----------------------------------
-
-    def submit_form_button():
-        # Button that submits the entry
-        submit_button = tk.Button(
-            add_task_page,
-            text="Submit",
-            command=lambda: submit_new_task(),
-            bg="green",
-            fg="black",
-            padx=15,
-            pady=10,
-        )
-
-        submit_button.grid(row=4, column=1)
-
-    # --------------------------------------- Dropdown select area --------------------------------------
-
-    def create_dropdown_area():
+        # --------------------------------------- Dropdown select area --------------------------------------
         # Add a frame for the dropdown select buttons
         dropdown_area = tk.Frame(
             add_task_page,
@@ -255,7 +243,23 @@ def create_add_task_page(system_state):
         )
         date_label.grid(row=0, column=1, sticky="")
 
-        return selected_priority, date_entry
+        return title_entry, description_entry, selected_priority, date_entry
+
+    # ------------------------------------ Submit form -----------------------------------
+
+    def submit_form_button(entries):
+        # Button that submits the entry
+        submit_button = tk.Button(
+            add_task_page,
+            text="Submit",
+            command=lambda: submit_new_task(entries),
+            bg="green",
+            fg="black",
+            padx=15,
+            pady=10,
+        )
+
+        submit_button.grid(row=4, column=1)
 
     # --------------------------------------- Exit button --------------------------------------
     def create_exit_button():
@@ -270,11 +274,18 @@ def create_add_task_page(system_state):
         )
 
         exit_button.grid(row=4, column=0)
- #= =================================#= =================================#= =================================
-    create_title_bar()
-    title_entry, description_entry = create_title_description_entry()
-    submit_form_button()
-    selected_priority, date_entry = create_dropdown_area()
-    create_exit_button()
 
-    return add_task_page
+    # ====================================== COMPILE FUNCTIONS & LOAD PAGE ======================================
+    def build_page():
+        create_title_bar()
+        entries = create_entry_fields()
+        submit_form_button(entries)
+        create_exit_button()
+
+    def refresh_home():
+        refresh(add_task_page, build_page)
+
+    page_setup()
+    build_page()
+
+    return add_task_page, refresh_home

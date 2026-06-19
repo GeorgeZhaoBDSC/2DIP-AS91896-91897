@@ -13,13 +13,15 @@ def main():
     root.columnconfigure(0, weight=1)
 
     # Create system_state, which stores variables and functions across different pages. All page can access this.
+    # Under system state, current task (refered to as task_id variable) stores the current list (first number) and task
+    # from the list (second number) the user is currently on.
     system_state = {"root": root, "pages": {}, "refresh_pages": None, "task_list": None, "current_task": [0, 0]}
     
     # Add a common root frame for all the pages to use
 
     # Add the code for each page to system state.
     home, refresh_home = create_home_page(system_state)
-    add_task = create_add_task_page(system_state)
+    add_task, refresh_add_task = create_add_task_page(system_state)
     view_task, refresh_view_task = create_view_task_page(system_state)
 
     system_state["pages"] = {
@@ -30,7 +32,7 @@ def main():
 
     system_state["refresh_pages"] = {
         "home": refresh_home,
-        "add_task": lambda: None,
+        "add_task": refresh_add_task,
         "view_task": refresh_view_task
     }
 
