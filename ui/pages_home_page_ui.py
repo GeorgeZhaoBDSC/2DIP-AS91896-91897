@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import messagebox
 from .backend.to_do_list_functions import *
 from .backend.navigation import *
 from .backend. refresh import *
@@ -49,23 +50,54 @@ def create_home_page(system_state):
 
         title_bar.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-        title_label = tk.Label(
+        # Making the title an entry so the user can directly edit the name of the list from here
+
+        title_entry = tk.Entry(
             title_bar,
-            text=title,
             font=TITLE_FONT,
             fg="black",
             bg="lightgrey",
             relief="flat",
-            anchor="center",
             justify="center",
+            bd=0,
+            highlightthickness=0,
         )
 
         # Place title text in the title grid area
-        title_label.grid(
+        title_entry.grid(
             row=0,
             column=0,
-            sticky=""
+            sticky="nsew"
         )
+
+        title_entry.insert(0, title)
+
+        # Function to save the title when edited
+        def save_title(event=None):
+            # Get the title
+            new_title = title_entry.get()
+
+            if len(new_title) > LIST_TITLE_LENGTH:
+                messagebox.showinfo("!!", f"Title should be at most {LIST_TITLE_LENGTH} characters long.")
+                return
+
+
+            # Save it to the task list
+            # Converts the dictionary into an ordered datatype we can insert the new title in the right place.
+            items = list(task_list.items())
+            original_title, value = items[task_id[0]]
+            items[task_id[0]] = (new_title, value)
+
+            new_task_list = dict(items)
+
+            task_list.clear()
+            task_list.update(new_task_list)
+
+            system_state["refresh_pages"]["home"]()
+
+        # Activate the save title function upon pressing return or clicking off the title bar
+        title_entry.bind("<Return>", save_title)
+        title_entry.bind("<FocusOut>", save_title)
 
     def create_side_bar():
         # ------------------------------------- Side bar setup ------------------------------------
@@ -402,5 +434,3 @@ def create_home_page(system_state):
     build_page()
 
     return home_page, refresh_home
-
-

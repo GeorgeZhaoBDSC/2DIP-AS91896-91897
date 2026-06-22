@@ -1,7 +1,10 @@
 import json
 
 # The maximum number of characters of the title to a task displayed on each card on the home page
-TITLE_LENGTH = 50
+TASK_TITLE_LENGTH = 50
+
+# The maximum number of characters of the title of a list
+LIST_TITLE_LENGTH = 25
 
 # Default font for title and regular text
 TITLE_FONT = ("Times New Roman", 50)
@@ -52,9 +55,9 @@ def get_task_info(task_id):
     return list(task_list.values())[task_id[0]][task_id[1]]
 
 def get_shortened_title(task_id):
-    # Get the title for the task and shorten it to at most TITLE_LENGTH
+    # Get the title for the task and shorten it to at most TASK_TITLE_LENGTH
     title = list(task_list.values())[task_id[0]][task_id[1]]["title"]
-    shortened_title = title[:TITLE_LENGTH]
+    shortened_title = title[:TASK_TITLE_LENGTH]
     return shortened_title
 
 def sort_tasks():
