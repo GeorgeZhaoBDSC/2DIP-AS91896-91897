@@ -30,6 +30,12 @@ def create_home_page(system_state):
 
     # --------------------------------------- Title Bar --------------------------------------
     def create_title_bar():
+
+        task_id = system_state["current_task"]
+
+        # Fetch the title for the list
+        title = list(task_list.keys())[task_id[0]]
+
         # Assigning properties to the title bar
         title_bar = tk.Frame(
             home_page,
@@ -45,7 +51,7 @@ def create_home_page(system_state):
 
         title_label = tk.Label(
             title_bar,
-            text="To do list",
+            text=title,
             font=TITLE_FONT,
             fg="black",
             bg="lightgrey",
@@ -79,7 +85,11 @@ def create_home_page(system_state):
         left_container.grid_rowconfigure(0, weight=1)
         left_container.grid_rowconfigure(1, weight=1)
         left_container.grid_rowconfigure(2, weight=3)
+        left_container.grid_rowconfigure(1, weight=1)
+
         left_container.grid_columnconfigure(0, weight=1)
+
+        # ------------------------------------- Add task button ------------------------------------
 
         # Button to add a new task, takes user to the page where you enter a new task
         add_task_button = tk.Button(
@@ -94,7 +104,6 @@ def create_home_page(system_state):
             bd = 0,
             cursor = "hand1",
         )
-        # ------------------------------------- Add task button ------------------------------------
 
         # Scroll bar with buttons to switch between lists
         # Padding seperates the add task button from the list buttons
@@ -125,7 +134,11 @@ def create_home_page(system_state):
         # ------------------------------------- List Buttons ------------------------------------
 
         # Create container for the buttons
-        list_btn_container = tk.Frame(left_container)
+        list_btn_container = tk.Frame(
+            left_container,
+            bg="white",
+            highlightthickness=0,
+        )
 
         # Resize the grid areas
         list_btn_container.rowconfigure(0, weight=1)
@@ -171,6 +184,14 @@ def create_home_page(system_state):
             # Title of the button is the title of the To do list
             button_text = list(task_list.keys())[list_id]
 
+            # Make the current list button a different colour
+
+            # task_id = system_state["current_task"]
+            # if task_id[0] == list_id:
+            #     btn_color = "black"
+            # else:
+            #     btn_color = "white"
+
             # Style for the button
             button = tk.Button(
                 btn_frame,
@@ -179,7 +200,7 @@ def create_home_page(system_state):
                 padx=10,
                 pady=10,
                 font=TEXT_FONT,
-                bg="lightgrey",
+                bg="red",
                 fg="black",
                 relief="flat",
                 activebackground="#D6D6D6",
@@ -192,6 +213,35 @@ def create_home_page(system_state):
         # Creates all of the buttons
         for i in range(len(task_list)):
             create_button(i)
+
+        # ------------------------------------- Add new list button ------------------------------------
+
+        def new_list():
+            create_new_list()
+            # Switch user to the new list they created, the index of the last list is len - 2 because the last list is COMPLETE
+            list_id = len(task_list) - 2
+            system_state["current_task"][0] = list_id
+            system_state["refresh_pages"]["home"]()
+
+        # Button to create a new list
+        new_list_button = tk.Button(
+            left_container,
+            text="Create New List",
+            command=lambda: new_list(),
+            font=("Times New Roman", 18),
+            bg="#2563EB",
+            fg="black",
+            relief="flat",
+            activebackground="#D6D6D6",
+            bd=0,
+            cursor="hand1",
+        )
+
+        # Scroll bar with buttons to switch between lists
+        # Padding seperates the add task button from the list buttons
+        new_list_button.grid(row=3, column=0, sticky="nsew", pady=(15, 0))
+
+
 
     # --------------------------------- Tasks cards (right side) ---------------------------------
 
