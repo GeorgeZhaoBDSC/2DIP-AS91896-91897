@@ -31,7 +31,6 @@ def create_home_page(system_state):
 
     # --------------------------------------- Title Bar --------------------------------------
     def create_title_bar():
-
         task_id = system_state["current_task"]
 
         # Fetch the title for the list
@@ -45,10 +44,10 @@ def create_home_page(system_state):
             height = 100,
             bg="lightgrey"
         )
+        # Assign gridarea for frame
+        title_bar.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
         title_bar.grid_columnconfigure(0, weight=1)
-
-        title_bar.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
         # Making the title an entry so the user can directly edit the name of the list from here
 
@@ -63,41 +62,6 @@ def create_home_page(system_state):
             highlightthickness=0,
         )
 
-        # Place title text in the title grid area
-        title_entry.grid(
-            row=0,
-            column=0,
-            sticky="nsew"
-        )
-
-        title_entry.insert(0, title)
-
-        # Function to save the title when edited
-        def save_title(event=None):
-            # Get the title
-            new_title = title_entry.get()
-
-            if len(new_title) > LIST_TITLE_LENGTH:
-                messagebox.showinfo("!!", f"Title should be at most {LIST_TITLE_LENGTH} characters long.")
-                return
-
-
-            # Save it to the task list
-            # Converts the dictionary into an ordered datatype we can insert the new title in the right place.
-            items = list(task_list.items())
-            original_title, value = items[task_id[0]]
-            items[task_id[0]] = (new_title, value)
-
-            new_task_list = dict(items)
-
-            task_list.clear()
-            task_list.update(new_task_list)
-
-            system_state["refresh_pages"]["home"]()
-
-        # Activate the save title function upon pressing return or clicking off the title bar
-        title_entry.bind("<Return>", save_title)
-        title_entry.bind("<FocusOut>", save_title)
 
     def create_side_bar():
         # ------------------------------------- Side bar setup ------------------------------------
@@ -119,7 +83,8 @@ def create_home_page(system_state):
         left_container.grid_rowconfigure(2, weight=3)
         left_container.grid_rowconfigure(1, weight=1)
 
-        left_container.grid_columnconfigure(0, weight=1)
+        left_container.grid_columnconfigure(0, weight=1, minsize=100)
+        left_container.grid_columnconfigure(1, weight=1, minsize=100)
 
         # ------------------------------------- Add task button ------------------------------------
 
@@ -139,7 +104,7 @@ def create_home_page(system_state):
 
         # Scroll bar with buttons to switch between lists
         # Padding seperates the add task button from the list buttons
-        add_task_button.grid(row=0, column=0, sticky="nsew", pady=(0, 15))
+        add_task_button.grid(row=0, column=0, columnspan=2, sticky="nsew", pady=(0, 15))
 
         # ---------------------------------- List Buttons title ---------------------------------
 
@@ -158,6 +123,7 @@ def create_home_page(system_state):
         list_title.grid(
             row=1,
             column=0,
+            columnspan=2,
             sticky="nsew",
             padx=10,
             pady=10,
@@ -176,7 +142,7 @@ def create_home_page(system_state):
         list_btn_container.rowconfigure(0, weight=1)
         list_btn_container.columnconfigure(0, weight=1)
 
-        list_btn_container.grid(row=2, column=0, sticky="nsew")
+        list_btn_container.grid(row=2, column=0, columnspan=2, sticky="nsew")
 
         btn_canvas = tk.Canvas(list_btn_container, bg="white", highlightthickness=0)
         btn_scrollbar = tk.Scrollbar(
@@ -189,7 +155,7 @@ def create_home_page(system_state):
         btn_canvas.configure(yscrollcommand=btn_scrollbar.set)
 
         # Assign areas for the buttons and scroll bar
-        btn_canvas.grid(row=0, column=0, sticky="nsew")
+        btn_canvas.grid(row=0, column=0, columnspan=2, sticky="nsew")
         btn_scrollbar.grid(row=0, column=1, sticky="ns")
 
         # Create the frame to put the buttons of the scroll bar in
@@ -216,13 +182,14 @@ def create_home_page(system_state):
             # Title of the button is the title of the To do list
             button_text = list(task_list.keys())[list_id]
 
-            # Make the current list button a different colour
-
-            # task_id = system_state["current_task"]
-            # if task_id[0] == list_id:
-            #     btn_color = "black"
-            # else:
-            #     btn_color = "white"
+            # Make the current list button and COMPLETED a different colour
+            task_id = system_state["current_task"]
+            if task_id[0] == list_id:
+                btn_color = "grey"
+            elif task_id[0] == len(task_list) - 1:
+                btn_color = "lightgreen"
+            else:
+                btn_color = "lightgrey"
 
             # Style for the button
             button = tk.Button(
@@ -232,7 +199,7 @@ def create_home_page(system_state):
                 padx=10,
                 pady=10,
                 font=TEXT_FONT,
-                bg="red",
+                bg=btn_color,
                 fg="black",
                 relief="flat",
                 activebackground="#D6D6D6",
@@ -246,8 +213,9 @@ def create_home_page(system_state):
         for i in range(len(task_list)):
             create_button(i)
 
-        # ------------------------------------- Add new list button ------------------------------------
+        # ------------------------------------- Add/delete list buttons ------------------------------------
 
+        # Function that activates when creating a new list
         def new_list():
             create_new_list()
             # Switch user to the new list they created, the index of the last list is len - 2 because the last list is COMPLETE
@@ -256,11 +224,11 @@ def create_home_page(system_state):
             system_state["refresh_pages"]["home"]()
 
         # Button to create a new list
-        new_list_button = tk.Button(
+        new_list_btn = tk.Button(
             left_container,
             text="Create New List",
             command=lambda: new_list(),
-            font=("Times New Roman", 18),
+            font=("Times New Roman", 12),
             bg="#2563EB",
             fg="black",
             relief="flat",
@@ -269,10 +237,40 @@ def create_home_page(system_state):
             cursor="hand1",
         )
 
-        # Scroll bar with buttons to switch between lists
+        # Places button in grid
         # Padding seperates the add task button from the list buttons
-        new_list_button.grid(row=3, column=0, sticky="nsew", pady=(15, 0))
+        new_list_btn.grid(row=3, column=0, sticky="nsew", pady=(15, 0))
 
+        # Function to remove a list
+        def remove_list():
+            task_id = system_state["current_task"]
+            delete_list(task_id[0])
+            # Switch user to a previous list
+            list_id = 0
+            system_state["current_task"][0] = list_id
+            system_state["refresh_pages"]["home"]()
+
+        # Button that deletes the current list
+        remove_list_btn = tk.Button(
+            left_container,
+            text="Delete List",
+            command=lambda: remove_list(),
+            font=("Times New Roman", 12),
+            bg="#2563EB",
+            fg="black",
+            relief="flat",
+            activebackground="#D6D6D6",
+            bd=0,
+            cursor="hand1",
+        )
+
+        # Create the button only if the list is not the last "COMPLETE" list because that list cannot be deleted
+        task_id = system_state["current_task"]
+        can_delete = task_id[0] != len(task_list) - 1
+        if can_delete:
+            remove_list_btn.grid(row=3, column=1, sticky="nsew", pady=(15, 0))
+        else:
+            remove_list_btn.grid_forget()
 
 
     # --------------------------------- Tasks cards (right side) ---------------------------------
@@ -434,3 +432,5 @@ def create_home_page(system_state):
     build_page()
 
     return home_page, refresh_home
+
+
