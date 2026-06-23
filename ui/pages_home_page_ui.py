@@ -62,6 +62,54 @@ def create_home_page(system_state):
             highlightthickness=0,
         )
 
+        # Place title text in the title grid area
+        title_entry.grid(
+            row=0,
+            column=0,
+            sticky="nsew"
+        )
+
+        title_entry.insert(0, title)
+
+        # If the list is the last one, ie COMPLETE, you are not allowed to edit its title because it always the same.
+        if task_id[0] == len(task_list) - 1:
+            title_entry.config(
+                state="readonly",
+                readonlybackground="lightgrey"
+            )
+
+        # Function to save the title when edited
+        def save_title(event=None):
+            # Get the title
+            new_title = title_entry.get()
+
+            if len(new_title) > LIST_TITLE_LENGTH:
+                messagebox.showinfo("!!", f"Title should be at most {LIST_TITLE_LENGTH} characters long.")
+                return
+            elif len(new_title) == 0:
+                messagebox.showinfo("!!", f"Title cannot be empty.")
+                return
+            elif new_title in list(task_list.keys()) and new_title != title:
+                messagebox.showinfo("!!", f"Title already exists.")
+                return
+
+
+            # Save it to the task list
+            # Converts the dictionary into an ordered datatype we can insert the new title in the right place.
+            items = list(task_list.items())
+            original_title, value = items[task_id[0]]
+            items[task_id[0]] = (new_title, value)
+
+            new_task_list = dict(items)
+
+            task_list.clear()
+            task_list.update(new_task_list)
+
+            system_state["refresh_pages"]["home"]()
+
+        # Activate the save title function upon pressing return or clicking off the title bar
+        title_entry.bind("<Return>", save_title)
+        title_entry.bind("<FocusOut>", save_title)
 
     def create_side_bar():
         # ------------------------------------- Side bar setup ------------------------------------
