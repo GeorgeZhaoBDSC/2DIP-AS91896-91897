@@ -467,18 +467,19 @@ def create_home_page(system_state):
             create_card(card_frame, [task_id[0], i])
 
     # ====================================== COMPILE FUNCTIONS & LOAD PAGE ======================================
-
+    # Compile all elements of the page
     def build_page():
         create_title_bar()
         create_side_bar()
         create_task_cards()
 
+    # Refresh page by passing all elements of the page into the refresh function where the refresh page function
+    # Deletes all elements and rebuilds it using the build_page() function
     def refresh_home():
         refresh(home_page, build_page)
 
+    # Build and refresh the page to start with
     page_setup()
     build_page()
 
     return home_page, refresh_home
-
-

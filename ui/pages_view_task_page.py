@@ -30,8 +30,9 @@ def create_view_task_page(system_state):
 
         # The starting width of the window columns is 150/300/300px, and then expands with the ratio of 1:5:5
         view_task_page.columnconfigure(0, minsize = 150, weight=1)
-        view_task_page.columnconfigure(1, minsize = 300, weight=5)
-        view_task_page.columnconfigure(2, minsize = 300, weight=5)
+        view_task_page.columnconfigure(1, minsize = 200, weight=2)
+        view_task_page.columnconfigure(2, minsize = 200, weight=2)
+        view_task_page.columnconfigure(3, minsize=200, weight=2)
 
     # ============================================= PAGE CONTENTS =============================================
 
@@ -93,7 +94,7 @@ def create_view_task_page(system_state):
             view_task_page,
             text="Save Changes",
             command=lambda: save_task_info(),
-            bg="green",
+            bg="lightgrey",
             fg="black",
             padx=15,
             pady=10,
@@ -125,7 +126,7 @@ def create_view_task_page(system_state):
             view_task_page,
             text="Delete task",
             command=lambda: delete_task_info(),
-            bg="green",
+            bg="lightgrey",
             fg="black",
             padx=15,
             pady=10,
@@ -147,7 +148,7 @@ def create_view_task_page(system_state):
 
         title_bar.grid_columnconfigure(0, weight=1)
 
-        title_bar.grid(row=0, column=0, columnspan=3, sticky="nsew")
+        title_bar.grid(row=0, column=0, columnspan=4, sticky="nsew")
 
         title_label = tk.Label(
             title_bar,
@@ -200,10 +201,10 @@ def create_view_task_page(system_state):
         # Makes both text boxes sticky left to right, however title text box doesn't have to be very wide
         # so it is not sticky top to bottom like the description entry box
         title_edit_label.grid(row=1, column=0, sticky="ew")
-        title_edit_entry.grid(row=1, column=1, columnspan=2, sticky="ew", padx=(0, 20))
+        title_edit_entry.grid(row=1, column=1, columnspan=3, sticky="ew", padx=(0, 20))
 
         description_edit_label.grid(row=2, column=0, sticky="ew")
-        description_edit_entry.grid(row=2, column=1, columnspan=2, sticky="ew", padx=(0, 20))
+        description_edit_entry.grid(row=2, column=1, columnspan=3, sticky="ew", padx=(0, 20))
 
 
         # --------------------------------------- Dropdown select --------------------------------------
@@ -215,12 +216,7 @@ def create_view_task_page(system_state):
             pady=10,
         )
 
-        dropdown_area.grid(
-            row=3,
-            column=0,
-            columnspan=3,
-            sticky="nsew"
-        )
+        dropdown_area.grid(row=3,column=0,columnspan=4,sticky="nsew")
 
         # Define the sizes of the columns in this nested grid
         dropdown_area.columnconfigure(0, weight=1)
@@ -316,13 +312,48 @@ def create_view_task_page(system_state):
             view_task_page,
             text="Home",
             command=lambda: exit_task(),
-            bg="green",
+            bg="lightgrey",
             fg="black",
             padx = 10,
             pady = 10,
         )
 
         exit_button.grid(row=4, column=0)
+
+    # --------------------------------------- Finish button --------------------------------------
+    def create_finish_button():
+        # Reassign the task_id that might have changed.
+        task_id = system_state["current_task"]
+
+        # Do not create a finish button if this task is already in the finished list
+        if task_id[0] == len(task_list) - 1:
+            return
+
+        # A function that activates when the user presses finish task
+        def finish_task():
+            # Reassign the task_id that might have changed.
+            task_id = system_state["current_task"]
+
+            # Mark the task as done by moving it to the finished list
+            mark_as_done(task_id)
+
+            # Refresh the home page card scroll bar so update shows up
+            system_state["refresh_pages"]["home"]()
+
+            # Switch back to the home page
+            switch_page(system_state, "home")
+
+        finish_button = tk.Button(
+            view_task_page,
+            text="Complete",
+            command=lambda: finish_task(),
+            bg="lightgrey",
+            fg="black",
+            padx=10,
+            pady=10,
+        )
+
+        finish_button.grid(row=4, column=3)
 
     def add_task_info(entries):
         title_edit_entry, description_edit_entry, selected_priority, date_entry = entries
@@ -336,15 +367,21 @@ def create_view_task_page(system_state):
         title_edit_entry.delete("1.0", tk.END)
         description_edit_entry.delete("1.0", tk.END)
 
+        # Find the list the task is in
+        current_list = list(task_list.values())[task_id[0]]
+
+        if not current_list:
+            return
+
         # Insert the correct text back in
         # Writes new title and description into those 2 entry boxes on the view task page
-        title_edit_entry.insert("1.0", list(task_list.values())[task_id[0]][task_id[1]]["title"])
-        description_edit_entry.insert("1.0", list(task_list.values())[task_id[0]][task_id[1]]["description"])
+        title_edit_entry.insert("1.0", current_list[task_id[1]]["title"])
+        description_edit_entry.insert("1.0", current_list[task_id[1]]["description"])
 
         # Write the selected priority option into the priority box
-        selected_priority.set(list(task_list.values())[task_id[0]][task_id[1]]["priority"])
+        selected_priority.set(current_list[task_id[1]]["priority"])
 
-        stored_date = list(task_list.values())[task_id[0]][task_id[1]]["date"]
+        stored_date = current_list[task_id[1]]["date"]
         # Convert the stored date format back into a DateEntry usable format
         due_date = dt.strptime(stored_date, "%Y-%m-%d").date()
 
@@ -352,18 +389,22 @@ def create_view_task_page(system_state):
         date_entry.set_date(due_date)
 
     # ====================================== COMPILE FUNCTIONS & LOAD PAGE ======================================
-
+    # Compile all elements of the page
     def build_page():
         create_title_bar()
         entries = create_entry_fields()
         create_exit_button(entries)
         create_delete_button()
+        create_finish_button()
         create_save_button(entries)
         add_task_info(entries)
 
+    # Refresh page by passing all elements of the page into the refresh function where the refresh page function
+    # Deletes all elements and rebuilds it using the build_page() function
     def refresh_page():
         refresh(view_task_page, build_page)
 
+    # Build and refresh the page to start with
     page_setup()
     build_page()
 

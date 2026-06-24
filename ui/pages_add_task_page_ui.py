@@ -97,7 +97,7 @@ def create_add_task_page(system_state):
 
         # If description is blank, notify user, give option to continue without a descrpiton
         if description == "":
-            return messagebox.askyesno("!!", "Your task does not have description. Do yo want to save the task?")
+            return messagebox.askyesno("!!", "Your task does not have description. Do you want to save the task?")
 
         return True
 
@@ -193,14 +193,16 @@ def create_add_task_page(system_state):
         # Priority Select button
         # variable to store the selected option
         selected_priority = tk.StringVar()
-        selected_priority.set(PRIORITY_OPTIONS[0])
+
+        # Selecting a medium priority to start with
+        selected_priority.set(PRIORITY_OPTIONS[1])
 
         # Create dropdown
         # The last element is removed as it is COMPLETE. The program does not allow the user to add a task that is already done.
         dropdown = tk.OptionMenu(
             dropdown_area,
             selected_priority,
-            *PRIORITY_OPTIONS[:-1],
+            *PRIORITY_OPTIONS,
         )
 
         # Places the dropdown into the grid
@@ -253,7 +255,7 @@ def create_add_task_page(system_state):
             add_task_page,
             text="Submit",
             command=lambda: submit_new_task(entries),
-            bg="green",
+            bg="lightgrey",
             fg="black",
             padx=15,
             pady=10,
@@ -267,7 +269,7 @@ def create_add_task_page(system_state):
             add_task_page,
             text="Home",
             command=lambda: switch_page(system_state, "home"),
-            bg="green",
+            bg="lightgrey",
             fg="black",
             padx = 10,
             pady = 10,
@@ -276,15 +278,19 @@ def create_add_task_page(system_state):
         exit_button.grid(row=4, column=0)
 
     # ====================================== COMPILE FUNCTIONS & LOAD PAGE ======================================
+    # Compile all elements of the page
     def build_page():
         create_title_bar()
         entries = create_entry_fields()
         submit_form_button(entries)
         create_exit_button()
 
+    # Refresh page by passing all elements of the page into the refresh function where the refresh page function
+    # Deletes all elements and rebuilds it using the build_page() function
     def refresh_home():
         refresh(add_task_page, build_page)
 
+    # Build and refresh the page to start with
     page_setup()
     build_page()
 
