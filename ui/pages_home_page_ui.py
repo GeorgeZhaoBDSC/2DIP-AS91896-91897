@@ -1,238 +1,485 @@
 import tkinter as tk
+from tkinter import messagebox
 from .backend.to_do_list_functions import *
 from .backend.navigation import *
+from .backend. refresh import *
 
 def create_home_page(system_state):
 
+    # ============================================= CREATE PAGE =============================================
+
     # Create root inside the home page function
     root = system_state["root"]
-
-    # ----------------------------------- General Page setup ---------------------------------
     # Create a home page
     home_page = tk.Frame(root)
 
-    # Places homepage in the root frame
-    home_page.grid(row=0, column=0, sticky="nsew")
+    # ============================================= PAGE SETUP =============================================
 
-    # Expandable window: Top row remains the same width, second row expands, starting at height of 400px
-    home_page.rowconfigure(1,minsize = 400, weight=1)
+    def page_setup():
+        # Places homepage in the root frame
+        home_page.grid(row=0, column=0, sticky="nsew")
 
-    # The starting width of the window columns is 250/500px, and then expands with the ratio of 1:5
-    home_page.columnconfigure(0, minsize = 250, weight=1)
-    home_page.columnconfigure(1, minsize = 500, weight=5)
+        # Expandable window: Top row remains the same width, second row expands, starting at height of 400px
+        home_page.rowconfigure(1,minsize = 400, weight=1)
+
+        # The starting width of the window columns is 100/500px, and then expands with the ratio of 1:5
+        home_page.columnconfigure(0, minsize = 250, weight=1)
+        home_page.columnconfigure(1, minsize = 500, weight=5)
+
+
+    # ============================================= PAGE CONTENTS =============================================
 
     # --------------------------------------- Title Bar --------------------------------------
+    def create_title_bar():
+        task_id = system_state["current_task"]
 
-    # Assigning properties to the title bar
+        # Fetch the title for the list
+        title = list(task_list.keys())[task_id[0]]
 
-    title_bar = tk.Frame(
-        home_page,
-        padx=10,
-        pady=20,
-        height = 100,
-        bg="lightgrey"
-    )
+        # Assigning properties to the title bar
+        title_bar = tk.Frame(
+            home_page,
+            padx=10,
+            pady=20,
+            height = 100,
+            bg="lightgrey"
+        )
+        # Assign gridarea for frame
+        title_bar.grid(row=0, column=0, columnspan=2, sticky="nsew")
 
-    title_bar.grid_columnconfigure(0, weight=1)
+        title_bar.grid_columnconfigure(0, weight=1)
 
-    title_bar.grid(row=0, column=0, columnspan=2, sticky="nsew")
+        # Making the title an entry so the user can directly edit the name of the list from here
 
-    title_label = tk.Label(
-        title_bar,
-        text="To do list",
-        font=TITLE_FONT,
-        fg="black",
-        bg="lightgrey",
-        relief="flat",
-        anchor="center",
-        justify="center",
-    )
+        title_entry = tk.Entry(
+            title_bar,
+            font=TITLE_FONT,
+            fg="black",
+            bg="lightgrey",
+            relief="flat",
+            justify="center",
+            bd=0,
+            highlightthickness=0,
+        )
 
-    # Place title text in the title grid area
-    title_label.grid(
-        row=0,
-        column=0,
-        sticky=""
-    )
+        # Place title text in the title grid area
+        title_entry.grid(
+            row=0,
+            column=0,
+            sticky="nsew"
+        )
 
-    # ------------------------------------- Left side bar ------------------------------------
-    left_container = tk.Frame(
-        home_page,
-        padx=20,
-        pady=20,
-        bg="white"
-    )
-    left_container.grid(row=1, column=0, sticky="nsew")
+        title_entry.insert(0, title)
 
-    # Adding a nested grid inside the left container for more of the UI
-    left_container.grid_rowconfigure(1, weight=1)
-    left_container.grid_columnconfigure(0, weight=1)
+        # If the list is the last one, ie COMPLETE, you are not allowed to edit its title because it always the same.
+        if task_id[0] == len(task_list) - 1:
+            title_entry.config(
+                state="readonly",
+                readonlybackground="lightgrey"
+            )
 
-    # Button to add a new task, takes user to the page where you enter a new task
-    add_task_button = tk.Button(
-        left_container,
-        text="Add new task",
-        command=lambda: switch_page(system_state, "add_task"),
-        padx=20,
-        pady=20,
-        font=("Times New Roman", 18),
-        bg = "#2563EB",
-        fg = "black",
-        relief = "flat",
-        activebackground = "#D6D6D6",
-        bd = 0,
-        cursor = "hand1",
-    )
+        # Function to save the title when edited
+        def save_title(event=None):
+            # Get the title
+            new_title = title_entry.get()
 
-    add_task_button.grid(row=0, column=0, sticky="nsew")
-
-
-    # --------------------------------- Scroll bar Container ---------------------------------
-    scroll_container = tk.Frame(home_page)
-    scroll_container.grid(row=1, column=1, sticky="nsew")
-
-    scroll_container.rowconfigure(0, weight=1)
-    scroll_container.columnconfigure(0, weight=1)
-
-    # --------------------------- Scroll bar elements configuration ---------------------------
-
-    # Create a scroll bar container
-    canvas = tk.Canvas(scroll_container)
-    canvas.grid(row=0, column=0, sticky="nsew")
-
-    # Defining scrolling element
-    scrollbar = tk.Scrollbar(scroll_container, orient="vertical", command=canvas.yview)
-    scrollbar.grid(row=0, column=1, sticky="ns")
-    canvas.configure(yscrollcommand=scrollbar.set)
-
-    # Create a frame inside the canvas
-    card_frame = tk.Frame(canvas)
-    window_id = canvas.create_window((0, 0), window=card_frame, anchor="nw")
-
-    # Define the region
-    def update_scrollregion(event):
-        canvas.configure(scrollregion=canvas.bbox("all"))
-
-    card_frame.bind("<Configure>", update_scrollregion)
-
-    # Make the width the same as its container
-    def resize_frame(event):
-        canvas.itemconfig(window_id, width=event.width)
-
-    canvas.bind("<Configure>", resize_frame)
-
-    # -------------------------------- Scroll bar cards -------------------------------
-
-    # Configure the button on each scroll bar card such that it takes the user to the view task page and displays
-    # the correct information that corresponds to the card.
-
-    def open_view_task_page(card_id):
-        # store selected task id on the view task page so the information of the current task is accessible
-        # from the view task page
-        system_state["current_task"] = card_id
-        switch_page(system_state, "view_task")
-
-        # Refreshes the text boxes on the add task page so it displays the correct text for the respective task
-        system_state["refresh_pages"]["view_task"]()
-
-        # Switches to the view task page
-        switch_page(system_state, "view_task")
+            if len(new_title) > LIST_TITLE_LENGTH:
+                messagebox.showinfo("!!", f"Title should be at most {LIST_TITLE_LENGTH} characters long.")
+                return
+            elif len(new_title) == 0:
+                messagebox.showinfo("!!", f"Title cannot be empty.")
+                return
+            elif new_title in list(task_list.keys()) and new_title != title:
+                messagebox.showinfo("!!", f"Title already exists.")
+                return
 
 
-    # Creates each card with the information from each task
-    def create_card(parent, card_id, row):
+            # Save it to the task list
+            # Converts the dictionary into an ordered datatype we can insert the new title in the right place.
+            items = list(task_list.items())
+            original_title, value = items[task_id[0]]
+            items[task_id[0]] = (new_title, value)
 
-        # Colour the border of each card depending on the importance of the card
-        # create a dictionary that maps the importance to the respective colour
-        colour_map = dict(zip(PRIORITY_OPTIONS, PRIORITY_COLOURS))
+            new_task_list = dict(items)
 
-        highlight_colour = colour_map[task_list[card_id]["priority"]]
+            task_list.clear()
+            task_list.update(new_task_list)
 
-        card = tk.Frame(
-            parent,
+            system_state["refresh_pages"]["home"]()
+
+        # Activate the save title function upon pressing return or clicking off the title bar
+        title_entry.bind("<Return>", save_title)
+        title_entry.bind("<FocusOut>", save_title)
+
+    def create_side_bar():
+        # ------------------------------------- Side bar setup ------------------------------------
+        left_container = tk.Frame(
+            home_page,
+            padx=20,
+            pady=20,
+            bg="white",
+        )
+
+        # Stops the elements inside left container from changing its width and stretching it
+        left_container.grid_propagate(False)
+
+        left_container.grid(row=1, column=0, sticky="nsew")
+
+        # Adding a nested grid inside the left container for more of the UI, configured the rows
+        left_container.grid_rowconfigure(0, weight=1)
+        left_container.grid_rowconfigure(1, weight=1)
+        left_container.grid_rowconfigure(2, weight=3)
+        left_container.grid_rowconfigure(1, weight=1)
+
+        left_container.grid_columnconfigure(0, weight=1, minsize=100)
+        left_container.grid_columnconfigure(1, weight=1, minsize=100)
+
+        # ------------------------------------- Add task button ------------------------------------
+
+        # Button to add a new task, takes user to the page where you enter a new task
+        add_task_button = tk.Button(
+            left_container,
+            text="Add new task",
+            command=lambda: switch_page(system_state, "add_task"),
+            font=("Times New Roman", 18),
+            bg = "#2563EB",
+            fg = "black",
+            relief = "flat",
+            activebackground = "#D6D6D6",
+            bd = 0,
+            cursor = "hand1",
+        )
+
+        # Scroll bar with buttons to switch between lists
+        # Padding seperates the add task button from the list buttons
+        add_task_button.grid(row=0, column=0, columnspan=2, sticky="nsew", pady=(0, 15))
+
+        # ---------------------------------- List Buttons title ---------------------------------
+
+        # Created a label for the list buttons below
+        list_title = tk.Label(
+            left_container,
+            text="To Do Lists:",
+            font=("Times New Roman", 18),
+            fg="black",
+            bg="white",
+            relief="flat",
+            anchor="center",
+            justify="center"
+        )
+
+        list_title.grid(
+            row=1,
+            column=0,
+            columnspan=2,
+            sticky="nsew",
             padx=10,
             pady=10,
-            highlightbackground=highlight_colour,
-            highlightthickness=2,
         )
-        # -------------------------------- Card Layout -------------------------------
 
-        # Nested grid inside each card
-        card.grid_columnconfigure(0, weight=1)
-        card.grid_columnconfigure(1, weight=10)
-        card.grid_columnconfigure(2, weight=1)
+        # ------------------------------------- List Buttons ------------------------------------
 
-        # Adding a button to each card, which expands and gives more information about the task
-        card_button = tk.Button(
-            card,
-            text="View task",
-            command=lambda: open_view_task_page(card_id),
-            padx=5,
-            pady=5,
-            width=5,
-            font=TEXT_FONT,
+        # Create container for the buttons
+        list_btn_container = tk.Frame(
+            left_container,
+            bg="white",
+            highlightthickness=0,
+        )
+
+        # Resize the grid areas
+        list_btn_container.rowconfigure(0, weight=1)
+        list_btn_container.columnconfigure(0, weight=1)
+
+        list_btn_container.grid(row=2, column=0, columnspan=2, sticky="nsew")
+
+        btn_canvas = tk.Canvas(list_btn_container, bg="white", highlightthickness=0)
+        btn_scrollbar = tk.Scrollbar(
+            list_btn_container,
+            orient="vertical",
+            command=btn_canvas.yview
+        )
+
+        # Create scroll bar
+        btn_canvas.configure(yscrollcommand=btn_scrollbar.set)
+
+        # Assign areas for the buttons and scroll bar
+        btn_canvas.grid(row=0, column=0, columnspan=2, sticky="nsew")
+        btn_scrollbar.grid(row=0, column=1, sticky="ns")
+
+        # Create the frame to put the buttons of the scroll bar in
+        btn_frame = tk.Frame(btn_canvas)
+        btn_window = btn_canvas.create_window((0, 0), window=btn_frame, anchor="nw")
+        btn_frame.grid_columnconfigure(0, weight=1)
+
+        def update_btn_scrollregion(event):
+            btn_canvas.configure(scrollregion=btn_canvas.bbox("all"))
+
+        def resize_btn_frame(event):
+            btn_canvas.itemconfig(btn_window, width=event.width)
+
+        # Configure the regions to update when scrolling
+        btn_frame.bind("<Configure>", update_btn_scrollregion)
+        btn_canvas.bind("<Configure>", resize_btn_frame)
+
+        def switch_list(list_id):
+            system_state["current_task"][0] = list_id
+            system_state["refresh_pages"]["home"]()
+
+        # Create the button for each list
+        def create_button(list_id):
+            # Title of the button is the title of the To do list
+            button_text = list(task_list.keys())[list_id]
+
+            # Make the current list button and COMPLETED a different colour
+            task_id = system_state["current_task"]
+            if task_id[0] == list_id:
+                btn_color = "grey"
+            elif task_id[0] == len(task_list) - 1:
+                btn_color = "lightgreen"
+            else:
+                btn_color = "lightgrey"
+
+            # Style for the button
+            button = tk.Button(
+                btn_frame,
+                text=button_text,
+                command=lambda: switch_list(list_id),
+                padx=10,
+                pady=10,
+                font=TEXT_FONT,
+                bg=btn_color,
+                fg="black",
+                relief="flat",
+                activebackground="#D6D6D6",
+                bd=0,
+                cursor="hand1",
+            )
+
+            button.grid(row=list_id, column=0, sticky="nsew", pady=5)
+
+        # Creates all of the buttons
+        for i in range(len(task_list)):
+            create_button(i)
+
+        # ------------------------------------- Add/delete list buttons ------------------------------------
+
+        # Function that activates when creating a new list
+        def new_list():
+            create_new_list()
+            # Switch user to the new list they created, the index of the last list is len - 2 because the last list is COMPLETE
+            list_id = len(task_list) - 2
+            system_state["current_task"][0] = list_id
+            system_state["refresh_pages"]["home"]()
+
+        # Button to create a new list
+        new_list_btn = tk.Button(
+            left_container,
+            text="Create New List",
+            command=lambda: new_list(),
+            font=("Times New Roman", 12),
             bg="#2563EB",
             fg="black",
             relief="flat",
             activebackground="#D6D6D6",
             bd=0,
             cursor="hand1",
-            highlightthickness = 0
         )
 
-        # Places button inside card grid area
-        card_button.grid(row=0, column=2, sticky="ns")
+        # Places button in grid
+        # Padding seperates the add task button from the list buttons
+        new_list_btn.grid(row=3, column=0, sticky="nsew", pady=(15, 0))
 
-        # Creating the numbers 1, 2, 3 ... at the left end of each card
+        # Function to remove a list
+        def remove_list():
+            task_id = system_state["current_task"]
+            delete_list(task_id[0])
+            # Switch user to a previous list
+            list_id = 0
+            system_state["current_task"][0] = list_id
+            system_state["refresh_pages"]["home"]()
 
-        card_label = tk.Label(
-            card,
-            text=card_id+1,
-            padx=0,
-            pady=5,
-            font=TEXT_FONT,
+        # Button that deletes the current list
+        remove_list_btn = tk.Button(
+            left_container,
+            text="Delete List",
+            command=lambda: remove_list(),
+            font=("Times New Roman", 12),
+            bg="#2563EB",
             fg="black",
+            relief="flat",
+            activebackground="#D6D6D6",
+            bd=0,
+            cursor="hand1",
         )
 
-        card_label.grid(row=0, column=0, sticky="nsew")
+        # Create the button only if the list is not the last "COMPLETE" list because that list cannot be deleted
+        task_id = system_state["current_task"]
+        can_delete = task_id[0] != len(task_list) - 1
+        if can_delete:
+            remove_list_btn.grid(row=3, column=1, sticky="nsew", pady=(15, 0))
+        else:
+            remove_list_btn.grid_forget()
 
-        # Display the title of the task on each card
 
-        # title is shortened to fit the frame, there is a max number of characters
-        shortened_title = get_shortened_title(card_id)
+    # --------------------------------- Tasks cards (right side) ---------------------------------
 
-        card_title = tk.Label(
-            card,
-            text=shortened_title,
-            padx=0,
-            pady=5,
-            fg="black",
-            font = TEXT_FONT,
-            anchor="w" # Aligns text to the left
-        )
+    def create_task_cards():
+        # --------------------------------- Scroll bar Container ---------------------------------
+        scroll_container = tk.Frame(home_page)
+        scroll_container.grid(row=1, column=1, sticky="nsew")
 
-        card_title.grid(row=0, column=1, sticky="nsew")
+        scroll_container.rowconfigure(0, weight=1)
+        scroll_container.columnconfigure(0, weight=1)
 
-        # Place the card inside the scrolling frame
-        card.grid(
-            row=row,
-            column=0,
-            sticky="ew",
-            padx=10,
-            pady=5
-        )
+        # --------------------------- Scroll bar elements configuration ---------------------------
 
-        parent.grid_columnconfigure(0, weight=1)
+        # Create a scroll bar container
+        canvas = tk.Canvas(scroll_container)
+        canvas.grid(row=0, column=0, sticky="nsew")
 
-    # Creates a card for every to do list item, and also updates it when any changes are made to the list of tasks
-    # So that the new cards also show up
-    def refresh_home_page_cards():
-        for widget in card_frame.winfo_children():
-            widget.destroy()
+        # Defining scrolling element
+        scrollbar = tk.Scrollbar(scroll_container, orient="vertical", command=canvas.yview)
+        scrollbar.grid(row=0, column=1, sticky="ns")
+        canvas.configure(yscrollcommand=scrollbar.set)
 
-        for i in range(len(task_list)):
-            create_card(card_frame, i, i)
+        # Create a frame inside the canvas
+        card_frame = tk.Frame(canvas)
+        window_id = canvas.create_window((0, 0), window=card_frame, anchor="nw")
 
-    refresh_home_page_cards()
+        # Define the region
+        def update_scrollregion(event):
+            canvas.configure(scrollregion=canvas.bbox("all"))
 
-    return home_page, refresh_home_page_cards
+        card_frame.bind("<Configure>", update_scrollregion)
+
+        # Make the width the same as its container
+        def resize_frame(event):
+            canvas.itemconfig(window_id, width=event.width)
+
+        canvas.bind("<Configure>", resize_frame)
+
+        # -------------------------------- Scroll bar cards -------------------------------
+        # Configure the button on each scroll bar card such that it takes the user to the view task page and displays
+        # the correct information that corresponds to the card.
+
+        def open_view_task_page(task_id):
+            # store selected task id on the view task page so the information of the current task is accessible
+            # from the view task page
+            system_state["current_task"] = task_id
+            switch_page(system_state, "view_task")
+
+            # Refreshes the text boxes on the add task page so it displays the correct text for the respective task
+            system_state["refresh_pages"]["view_task"]()
+
+            # Switches to the view task page
+            switch_page(system_state, "view_task")
+
+
+        # Creates each card with the information from each task
+        def create_card(parent, task_id):
+
+            # Colour the border of each card depending on the importance of the card
+            # create a dictionary that maps the importance to the respective colour
+            colour_map = dict(zip(PRIORITY_OPTIONS, PRIORITY_COLOURS))
+
+            highlight_colour = colour_map[list(task_list.values())[task_id[0]][task_id[1]]["priority"]]
+
+            card = tk.Frame(
+                parent,
+                padx=10,
+                pady=10,
+                highlightbackground=highlight_colour,
+                highlightthickness=2,
+            )
+            # -------------------------------- Card Layout -------------------------------
+
+            # Nested grid inside each card
+            card.grid_columnconfigure(0, weight=1)
+            card.grid_columnconfigure(1, weight=10)
+            card.grid_columnconfigure(2, weight=1)
+
+            # Adding a button to each card, which expands and gives more information about the task
+            card_button = tk.Button(
+                card,
+                text="View task",
+                command=lambda: open_view_task_page(task_id),
+                padx=5,
+                pady=5,
+                width=5,
+                font=TEXT_FONT,
+                bg="#2563EB",
+                fg="black",
+                relief="flat",
+                activebackground="#D6D6D6",
+                bd=0,
+                cursor="hand1",
+                highlightthickness = 0
+            )
+
+            # Places button inside card grid area
+            card_button.grid(row=0, column=2, sticky="ns")
+
+            # Creating the numbers 1, 2, 3 ... at the left end of each card
+
+            card_label = tk.Label(
+                card,
+                text=task_id[1]+1,
+                padx=0,
+                pady=5,
+                font=TEXT_FONT,
+                fg="black",
+            )
+
+            card_label.grid(row=0, column=0, sticky="nsew")
+
+            # Display the title of the task on each card
+
+            # title is shortened to fit the frame, there is a max number of characters
+            shortened_title = get_shortened_title(task_id)
+
+            card_title = tk.Label(
+                card,
+                text=shortened_title,
+                padx=0,
+                pady=5,
+                fg="black",
+                font = TEXT_FONT,
+                anchor="w" # Aligns text to the left
+            )
+
+            card_title.grid(row=0, column=1, sticky="nsew")
+
+            # Place the card inside the scrolling frame
+            card.grid(
+                row=task_id[1],
+                column=0,
+                sticky="ew",
+                padx=10,
+                pady=5
+            )
+
+            parent.grid_columnconfigure(0, weight=1)
+
+
+        # Creates a card for every to do list item in the current to do list, which is list number task_id[0]
+        task_id = system_state["current_task"]
+        for i in range(len(list(task_list.values())[task_id[0]])):
+            create_card(card_frame, [task_id[0], i])
+
+    # ====================================== COMPILE FUNCTIONS & LOAD PAGE ======================================
+    # Compile all elements of the page
+    def build_page():
+        create_title_bar()
+        create_side_bar()
+        create_task_cards()
+
+    # Refresh page by passing all elements of the page into the refresh function where the refresh page function
+    # Deletes all elements and rebuilds it using the build_page() function
+    def refresh_home():
+        refresh(home_page, build_page)
+
+    # Build and refresh the page to start with
+    page_setup()
+    build_page()
+
+    return home_page, refresh_home
